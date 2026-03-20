@@ -37,6 +37,7 @@ export default defineConfig({
   title: 'AI资讯日报',
   description: '每日 AI 行业动态聚合 · 新闻 · 论文 · 开源 · 社区',
   lang: 'zh-CN',
+  base: '/ai-daily/',
   cleanUrls: true,
 
   themeConfig: {
