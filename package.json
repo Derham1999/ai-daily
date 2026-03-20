@@ -1,5 +1,6 @@
 {
   "name": "ai-daily",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "vitepress dev",
