@@ -1,15 +1,33 @@
 import { defineConfig } from 'vitepress'
 import fs from 'fs'
+import path from 'path'
 
 function getDailyReports() {
   try {
-    return fs.readdirSync('.')
-      .filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
-      .sort((a, b) => b.localeCompare(a))
-      .map(f => ({
-        text: f.replace('.md', ''),
-        link: '/' + f.replace('.md', ''),
-      }))
+    const sidebar = []
+    // 扫描所有月份目录（格式 YYYY-MM）
+    const months = fs.readdirSync('.')
+      .filter(f => /^\d{4}-\d{2}$/.test(f) && fs.statSync(f).isDirectory())
+      .sort((a, b) => b.localeCompare(a)) // 最新月份在前
+
+    for (const month of months) {
+      const files = fs.readdirSync(month)
+        .filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
+        .sort((a, b) => b.localeCompare(a)) // 最新日期在前
+
+      if (files.length === 0) continue
+
+      const [year, mon] = month.split('-')
+      sidebar.push({
+        text: `${year}年${mon}月`,
+        collapsed: false,
+        items: files.map(f => ({
+          text: f.replace('.md', ''),
+          link: `/${month}/${f.replace('.md', '')}`,
+        })),
+      })
+    }
+    return sidebar
   } catch {
     return []
   }
