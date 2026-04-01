@@ -7,12 +7,20 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-03/2026-03-31
+      link: /2026-04/2026-04-01
 ---
 
 ## 往期归档
 
 <details open>
+<summary>2026年04月</summary>
+
+<!-- 新期刊自动追加在此列表顶部 -->
+- [04-01](/2026-04/2026-04-01) — OpenAI完成1220亿美元融资估值8520亿，携手Amazon构建Agent基础设施
+
+</details>
+
+<details>
 <summary>2026年03月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
