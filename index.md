@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-04/2026-04-06
+      link: /2026-04/2026-04-07
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年04月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [04-07](/2026-04/2026-04-07) — OpenAI IPO前夜高层大换血，X API全面面向AI Agent开发者
 - [04-06](/2026-04/2026-04-06) — Gemma 4端侧登陆iPhone，OpenAI Codex改按token计费
 - [04-05](/2026-04/2026-04-05) — Gemma 4超越10倍体积模型，Claude全线接入Microsoft 365
 - [04-04](/2026-04/2026-04-04) — Claude全面接入Microsoft 365，OpenClaw安全漏洞引发社区恐慌
