@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-04/2026-04-08
+      link: /2026-04/2026-04-10
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年04月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [04-10](/2026-04/2026-04-10) — OpenAI Sora 升级水印技术防造假，支持更长视频生成
 - [04-08](/2026-04/2026-04-08) — Anthropic发布Claude Mythos Preview，OpenAI Codex周活破300万
 - [04-07](/2026-04/2026-04-07) — Ilya曝光70页OpenAI绝密文件，Anthropic年收飙至300亿美元
 - [04-06](/2026-04/2026-04-06) — Gemma 4端侧登陆iPhone，OpenAI Codex改按token计费
