@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-04/2026-04-18
+      link: /2026-04/2026-04-19
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年04月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [04-19](/2026-04/2026-04-19) — OpenAI发布GPT-Rosalind生命科学模型，Codex上线浏览器+评论模式
 - [04-18](/2026-04/2026-04-18) — OpenAI发布GPT-Rosalind生命科学模型，Claude Opus 4.7代码能力升级
 - [04-17](/2026-04/2026-04-17) — OpenAI Codex集成计算机使用功能，Claude 4.7登陆Cursor引开发者热议
 - [04-16](/2026-04/2026-04-16) — OpenAI Agents SDK重磅升级沙箱执行与Harness架构，网络安全进入Token竞争时代
