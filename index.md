@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-04/2026-04-28
+      link: /2026-04/2026-04-29
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年04月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [04-29](/2026-04/2026-04-29) — OpenAI与AWS深化合作登陆Bedrock，Claude.ai可用性遭质疑
 - [04-28](/2026-04/2026-04-28) — OpenAI与微软重签协议松绑Azure独占，Ineffable获$1.1B种子轮
 - [04-27](/2026-04/2026-04-27) — Auroch Engine推出AI助手外部记忆层，解决LLM长期记忆缺陷
 - [04-26](/2026-04/2026-04-26) — DeepSeek V4发布即开源，Google拟投400亿美元入股Anthropic
