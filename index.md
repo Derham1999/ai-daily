@@ -7,10 +7,18 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-04/2026-04-30
+      link: /2026-05/2026-05-01
 ---
 
 ## 往期归档
+
+<details open>
+<summary>2026年05月</summary>
+
+<!-- 新期刊自动追加在此列表顶部 -->
+- [05-01](/2026-05/2026-05-01) — OpenAI收购Cursor开发商AI编程工具市场格局生变，xAI承认使用OpenAI技术训练模型
+
+</details>
 
 <details open>
 <summary>2026年04月</summary>
