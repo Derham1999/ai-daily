@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-05/2026-05-20
+      link: /2026-05/2026-05-21
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年05月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [05-21](/2026-05/2026-05-21) — Anthropic发布Claude Code官方插件目录，AI编码工具生态扩张
 - [05-20](/2026-05/2026-05-20) — OpenHuman个人AI超级智能今日暴涨3973星，Claude Code生态爆发
 - [05-18](/2026-05/2026-05-18) — Microsoft AI Agent入门教程单日激增485星
 - [05-17](/2026-05/2026-05-17) — Agent技能框架大爆发，superpowers领衔Agentic Coding生态
