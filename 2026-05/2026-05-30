@@ -1,0 +1,55 @@
+# AI资讯日报 2026/5/30
+
+> `AI资讯` | `每日早读` | `全网数据聚合` | `前沿科学探索` | `行业自由发声` | `开源创新力量` | `AI与人类未来`
+
+## **今日摘要**
+
+::: tip 📋 今日摘要
+MoneyPrinterTurbo单日暴涨3567星，AI视频生成工具持续升温
+
+ECC以19.8万总星稳居Agent工具榜首，今日新增1406星
+
+AI内容质量控制双雄爆发，taste-skill与stop-slop关注消除平庸生成
+
+微软markitdown登顶文档解析，今日新增1873星
+:::
+
+## 产品与功能更新
+
+### 开源TOP项目
+
+1. **[affaan-m/ECC](https://github.com/affaan-m/ECC)** `JavaScript` ⭐ 198585 | +1406 今日新增
+   Agent harness性能优化系统，为 Claude Code、Codex、Opencode、Cursor 等提供 **技能、本能、记忆、安全** 和 **研究优先开发** 支持，成为AI编码代理生态的 **基础设施标杆**。
+
+2. **[microsoft/markitdown](https://github.com/microsoft/markitdown)** `Python` ⭐ 129959 | +1873 今日新增
+   微软开源的文档转 Markdown 工具，支持 **Office文档、PDF、图片** 等多种格式，为 RAG 和 AI 数据处理提供 **标准化预处理管道**。
+
+3. **[harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo)** `Python` ⭐ 69671 | +3567 今日新增
+   利用 AI 大模型 **一键生成高清短视频**，支持文案生成、字幕配音、画面编排全流程，今日星标激增显示 **AI视频创作需求持续旺盛**。
+
+4. **[anthropics/claude-code](https://github.com/anthropics/claude-code)** `Python` ⭐ 127874 | +395 今日新增
+   Anthropic 官方的终端编码代理，通过自然语言命令执行 **代码理解、例程自动化、Git工作流** 等任务，定义了 **Agentic Coding 新范式**。
+
+5. **[EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin)** `TypeScript` ⭐ 18134 | +353 今日新增
+   Compound Engineering 官方插件，支持 **Claude Code、Codex、Cursor** 等主流编码工具，体现 **跨平台插件生态** 的整合趋势。
+
+6. **[Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill)** `Shell` ⭐ 28132 | +2062 今日新增
+   为 AI 注入「好品味」，阻止生成 **无聊、通用的流水线内容**，呼应社区对 **AI内容同质化** 的反思。
+
+7. **[hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop)** ⭐ 6998 | +617 今日新增
+   专门移除 AI 生成文本的「AI痕迹」，提升内容 **人工感和可信度**，与 taste-skill 形成组合拳。
+
+8. **[run-llama/liteparse](https://github.com/run-llama/liteparse)** `Rust` ⭐ 7301 | +701 今日新增
+   LlamaIndex 出品的 **开源文档解析器**，主打 **快速、实用**，为知识库构建提供轻量级方案。
+
+9. **[galilai-group/stable-worldmodel](https://github.com/galilai-group/stable-worldmodel)** `Python` ⭐ 1252 | +362 今日新增
+   World Model 研究与评估平台，支持 **可复现实验**，为具身智能和物理世界建模提供 **标准化基准**。
+
+10. **[cursor/plugins](https://github.com/cursor/plugins)** `TypeScript` ⭐ 1298 | +134 今日新增
+    Cursor 官方插件规范与仓库，定义了 **AI编码工具插件化** 的标准接口。
+
+11. **[Crosstalk-Solutions/project-nomad](https://github.com/Crosstalk-Solutions/project-nomad)** `TypeScript` ⭐ 26964 | +318 今日新增
+    离线生存计算机，集成 **关键工具、知识和 AI**，为极端环境提供 **自主智能支持**。
+
+12. **[twentyhq/twenty](https://github.com/twentyhq/twenty)** `TypeScript` ⭐ 48408 | +578 今日新增
+    开源 CRM 系统，**专为 AI 设计**，挑战 Salesforce 的企业级市场地位。
