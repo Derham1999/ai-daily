@@ -7,10 +7,18 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-05/2026-05-31
+      link: /2026-06/2026-06-01
 ---
 
 ## 往期归档
+
+<details open>
+<summary>2026年06月</summary>
+
+<!-- 新期刊自动追加在此列表顶部 -->
+- [06-01](/2026-06/2026-06-01) — GitHub Trending热榜AI项目爆发，Microsoft开源文档转Markdown工具日增2798星
+
+</details>
 
 <details open>
 <summary>2026年05月</summary>
