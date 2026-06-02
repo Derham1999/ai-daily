@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-06/2026-06-01
+      link: /2026-06/2026-06-02
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年06月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [06-02](/2026-06/2026-06-02) — MoneyPrinterTurbo日增3375星领跑，AI视频生成工具持续高热
 - [06-01](/2026-06/2026-06-01) — GitHub Trending热榜AI项目爆发，Microsoft开源文档转Markdown工具日增2798星
 
 </details>
