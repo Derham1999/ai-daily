@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-06/2026-06-06
+      link: /2026-06/2026-06-07
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年06月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [06-07](/2026-06/2026-06-07) — Agentic技能框架superpowers领跑，open-notebook开源Notebook LM单日暴涨794星
 - [06-06](/2026-06/2026-06-06) — LLM Token压缩工具headroom单日暴涨2473星，60-95%压缩率引爆关注
 - [06-05](/2026-06/2026-06-05) — LLM token压缩工具headroom日增3142星登顶，AI Agent工具链持续爆发
 - [06-04](/2026-06/2026-06-04) — LLM token压缩工具headroom日增3530星登顶
