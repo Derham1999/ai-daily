@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-06/2026-06-09
+      link: /2026-06/2026-06-10
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年06月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [06-10](/2026-06/2026-06-10) — last30days-skill AI调研工具单日暴涨3191星，多源信息聚合能力受追捧
 - [06-09](/2026-06/2026-06-09) — AI Agent工具链生态持续爆发，last30days-skill单日新增3558星
 - [06-08](/2026-06/2026-06-08) — Hermes Agent与last30days-skill单日新增均超1100星标，AI Agent技能生态持续火热
 - [06-07](/2026-06/2026-06-07) — Agentic技能框架superpowers领跑，open-notebook开源Notebook LM单日暴涨794星
