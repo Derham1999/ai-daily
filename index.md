@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-06/2026-06-13
+      link: /2026-06/2026-06-14
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年06月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [06-14](/2026-06/2026-06-14) — Agentic Skills生态持续爆发，superpowers突破22万星标引领方法论革新
 - [06-13](/2026-06/2026-06-13) — AI Agent skills框架生态持续扩张，superpowers项目突破22万星标领跑
 - [06-12](/2026-06/2026-06-12) — AI Agent工具链生态全面爆发，superpowers与agent-skills星标突破22万与5万
 - [06-11](/2026-06/2026-06-11) — AI Agent Skills 生态爆发，superpowers与agent-skills星标突破22万与5万
