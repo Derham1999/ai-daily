@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-06/2026-06-16
+      link: /2026-06/2026-06-17
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年06月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [06-17](/2026-06/2026-06-17) — Google Pixel Drop 带来 Gemini Omni 视频创作，xAI 起诉 OpenAI 案被驳回
 - [06-16](/2026-06/2026-06-16) — NVIDIA 开源 AI Agent 安全扫描工具 SkillSpector，单日新增星标超千
 - [06-15](/2026-06/2026-06-15) — 金融市场迎来 Kronos 专用大模型，精准解读金融语言
 - [06-14](/2026-06/2026-06-14) — Agentic Skills生态持续爆发，superpowers突破22万星标引领方法论革新
