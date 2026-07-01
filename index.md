@@ -7,10 +7,18 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-06/2026-06-30
+      link: /2026-07/2026-07-01
 ---
 
 ## 往期归档
+
+<details open>
+<summary>2026年07月</summary>
+
+<!-- 新期刊自动追加在此列表顶部 -->
+- [07-01](/2026-07/2026-07-01) — AI安全渗透测试工具开源，企业漏洞检测迎来智能化时代
+
+</details>
 
 <details open>
 <summary>2026年06月</summary>
