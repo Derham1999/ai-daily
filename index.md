@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: 最新一期 →
-      link: /2026-07/2026-07-12
+      link: /2026-07/2026-07-13
 ---
 
 ## 往期归档
@@ -16,6 +16,7 @@ hero:
 <summary>2026年07月</summary>
 
 <!-- 新期刊自动追加在此列表顶部 -->
+- [07-13](/2026-07/2026-07-13) — Destructive Command Guard发布Agent危险命令拦截工具，单日新增444星引爆AI安全赛道
 - [07-12](/2026-07/2026-07-12) — DesktopCommanderMCP MCP服务器日增909星，superpowers框架突破25万星标
 - [07-10](/2026-07/2026-07-10) — AI求职自动化框架单日暴涨3716星，Claude Code驱动的求职新范式
 - [07-09](/2026-07/2026-07-09) — Agentic Skills 框架 superpowers 突破24万星标，领衔开源榜单
