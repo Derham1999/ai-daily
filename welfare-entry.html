@@ -29,7 +29,7 @@ if (location.hostname !== 'derham1999.github.io') {
   // 非线上环境(本地/其他静态托管)自动切换为同源推导
   DEMO = location.origin + location.pathname.replace('welfare-entry.html', '') + 'member-center.html';
 }
-var DL = 'hanting://h5?redirect_url=' + encodeURIComponent(DEMO + '?v=1&://hmall.huazhu.com/');
+var DL = 'hanting://h5?redirect_url=' + encodeURIComponent(DEMO + '?t=' + Date.now() + '&://hmall.huazhu.com/');
 document.getElementById('go').href = DL;
 // 延迟自动跳转(演示"零交互"场景)
 var sec = 5;
