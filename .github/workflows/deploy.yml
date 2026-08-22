@@ -25,6 +25,8 @@ jobs:
           mkdir -p _site/x.xpeng.com
           cp launch.html _site/launch.html
           cp x.xpeng.com/index.html _site/x.xpeng.com/index.html
+          cp welfare-entry.html _site/welfare-entry.html
+          cp member-center.html _site/member-center.html
           touch _site/.nojekyll
 
       - name: Upload artifact
