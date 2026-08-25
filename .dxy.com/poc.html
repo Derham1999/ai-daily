@@ -23,6 +23,15 @@ window.DXYJSBridge = {
 };
 
 L('href: ' + location.href);
+// ===== Chromium URL 解析器判定 (new URL = WebView 内核解析) =====
+['https://derham1999.github.io%5C.dxy.com/ai-daily/poc.html',
+ 'https://derham1999.github.io%2Fai-daily%5C.dxy.com/poc.html',
+ 'https://derham1999.github.io%23.dxy.com/x',
+ 'https://derham1999.github.io%2E.dxy.com/x'
+].forEach(function(u, i) {
+  try { var p = new URL(u); R('URLTEST'+i, u.substring(8,50) + ' => host=' + p.host + ' path=' + p.pathname); }
+  catch(e) { R('URLTEST'+i, u.substring(8,50) + ' => INVALID: ' + e.message); }
+});
 L('AndroidJSBridger: ' + (typeof window.AndroidJSBridger)); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
 L('----------------------------------------');
 
