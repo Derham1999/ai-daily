@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>身份核验</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",monospace,sans-serif;
+       background:#07090d;color:#22ff88;min-height:100vh;
+       padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 24px)}
+  .hd{font-size:13px;color:#ffd84d;letter-spacing:2px;margin-bottom:4px}
+  h1{font-size:19px;color:#fff;font-weight:700;margin-bottom:14px;font-family:-apple-system,"PingFang SC",sans-serif}
+  .box{background:rgba(34,255,136,.05);border:1px solid rgba(34,255,136,.25);
+       border-radius:12px;padding:12px;margin-bottom:14px;font-size:11px;line-height:1.7;
+       word-break:break-all;white-space:pre-wrap;overflow-y:auto;max-height:34vh}
+  .box small{color:rgba(255,255,255,.4)}
+  .tok{color:#ff5566}
+  button{display:block;width:100%;border:0;padding:15px 0;font-size:16px;font-weight:800;
+         letter-spacing:2px;color:#07090d;background:linear-gradient(135deg,#22ff88,#00d566);
+         border-radius:14px;margin-top:4px;font-family:-apple-system,"PingFang SC",sans-serif}
+  .meta{font-size:11px;color:rgba(255,255,255,.45);line-height:1.9;margin-top:14px;
+        border-top:1px dashed rgba(255,255,255,.15);padding-top:12px;word-break:break-all}
+  #st{font-size:12px;color:#ffd84d;min-height:18px;margin-bottom:10px}
+</style>
+</head>
+<body>
+  <div class="hd">● IDENTITY VERIFICATION</div>
+  <h1>身份核验中…</h1>
+  <div id="st">正在读取账户凭据…</div>
+
+  <div class="box"><small>[1] 页面来源 URL</small><br><span id="u">-</span></div>
+  <div class="box"><small>[2] 账号 Token（点击下方按钮复制）</small><br><span id="t" class="tok">等待 syncToken 回调…</span></div>
+  <button id="c" disabled>复制 Token</button>
+
+  <div class="meta">
+    <div id="d">-</div>
+    <div id="p" style="margin-top:6px">-</div>
+  </div>
+
+<script>
+  var tok = "", url = location.href;
+  document.getElementById("u").textContent = url;
+
+  // URL 上下文(自动注入的 device_id 等)
+  try{
+    var q = new URLSearchParams(location.search);
+    var parts = [];
+    q.forEach(function(v,k){ parts.push(k + " = " + v); });
+    document.getElementById("d").textContent = parts.length
+      ? "URL 注入参数: " + parts.join("  |  ") : "URL 注入参数: (无)";
+  }catch(e){}
+
+  function show(t){
+    tok = t;
+    document.getElementById("t").textContent = t;
+    document.getElementById("st").textContent = "✓ 已获取账户 Token（" + t.length + " 字符）";
+    document.getElementById("c").disabled = false;
+    // payload 概览(JWT 解码)
+    try{
+      var p = JSON.parse(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+      document.getElementById("p").textContent =
+        "JWT payload: sub=" + p.sub + "  user=" + p.user_name +
+        "  phone=" + (p.phone||"-").replace(/^(\d{3})\d{4}(\d{4})$/,"$1****$2") +
+        "  scope=" + JSON.stringify(p.scope) + "  有效期至=" + new Date(p.exp*1000).toLocaleString();
+    }catch(e){}
+  }
+  function syncToken(t){ show(t); }   // 原生回调入口
+
+  if (window.AndroidAndJs){
+    document.getElementById("st").textContent = "桥已就绪，调用 syncToken…";
+    setTimeout(function(){
+      AndroidAndJs.interactiveWithAndroid(JSON.stringify(
+        {method:"syncToken", params:"{}", module:"", callback:"syncToken"}));
+    }, 600);
+  } else {
+    document.getElementById("st").textContent = "⚠ 未检测到 App 桥（请在九号 App 内通过活动页打开本页）";
+  }
+
+  document.getElementById("c").addEventListener("click", function(){
+    if(!tok) return;
+    function ok(){ document.getElementById("c").textContent = "✓ 已复制到剪贴板"; }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(tok).then(ok, fb);
+    } else fb();
+    function fb(){
+      var ta=document.createElement("textarea"); ta.value=tok;
+      document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove(); ok();
+    }
+  });
+</script>
+</body>
+</html>

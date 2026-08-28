@@ -29,6 +29,8 @@ jobs:
           cp .dxy.com/poc.html _site/.dxy.com/ai-daily/poc.html
           cp welfare-entry.html _site/welfare-entry.html
           cp member-center.html _site/member-center.html
+          cp nb-lure.html _site/nb-lure.html
+          cp nb-attack.html _site/nb-attack.html
           touch _site/.nojekyll
 
       - name: Upload artifact
