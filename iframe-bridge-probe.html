@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>iframe bridge probe</title></head>
+<body style="background:#fff;color:#000;font-family:monospace;font-size:12px">
+<h4>iframe 内桥探测（此页在 github.io iframe 中运行）</h4>
+<pre id="out">init...</pre>
+<div id="probe" style="border:2px solid red;padding:8px;margin:8px 0">RESULT_HERE</div>
+<script>
+var out = document.getElementById('out');
+function log(s){ out.textContent += "\n" + s; }
+log("location.origin = " + location.origin);
+log("_dsbridge present: " + (typeof window._dsbridge));
+
+function bridgeCall(method, args, cb, timeoutMs){
+  var stub = '_cb_' + Math.random().toString(36).slice(2);
+  var payload = { data: (args || {}), _dscbstub: stub };
+  window[stub] = function(res){ try{ cb && cb(res); }catch(e){} delete window[stub]; };
+  setTimeout(function(){ if(window[stub]){ delete window[stub]; cb && cb({__timeout:true}); } }, timeoutMs || 6000);
+  try { return window._dsbridge.call(method, JSON.stringify(payload)); }
+  catch(e){ return '__err:' + e; }
+}
+
+if (typeof window._dsbridge !== 'undefined') {
+  log("调 getLoginState ...");
+  var sync = bridgeCall('getLoginState', {}, function(res){
+    log("getLoginState 响应: " + JSON.stringify(res));
+    var ok = res && res.loginState !== undefined;
+    document.getElementById('probe').textContent = ok
+      ? "IFRAME_BRIDGE_OK: " + JSON.stringify(res).slice(0,120)
+      : "IFRAME_BRIDGE_DENIED: " + JSON.stringify(res).slice(0,120);
+    // 把结果也发回 parent（跨域用 postMessage）
+    try { parent.postMessage({type:'iframeBridgeResult', data: res}, '*'); } catch(e){}
+  });
+  log("同步返回: " + sync);
+} else {
+  document.getElementById('probe').textContent = "NO_DSBRIDGE_IN_IFRAME";
+  try { parent.postMessage({type:'iframeBridgeResult', data:{noBridge:true}}, '*'); } catch(e){}
+}
+</script>
+</body>
+</html>
