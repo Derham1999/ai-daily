@@ -25,8 +25,6 @@ jobs:
           mkdir -p _site/x.xpeng.com _site/x.xiaopeng.com _site/.dxy.com _site/.dxy.com/ai-daily
           cp launch.html _site/launch.html
           cp launch-cn.html _site/launch-cn.html
-          cp localhost-poc.html _site/localhost-poc.html
-          cp lure-local.html _site/lure-local.html
           cp x.xpeng.com/index.html _site/x.xpeng.com/index.html
           cp x.xiaopeng.com/index.html _site/x.xiaopeng.com/index.html
           cp .dxy.com/poc.html _site/.dxy.com/poc.html
