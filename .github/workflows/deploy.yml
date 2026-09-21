@@ -22,9 +22,11 @@ jobs:
 
       - name: Prepare static site
         run: |
-          mkdir -p _site/x.xpeng.com _site/.dxy.com _site/.dxy.com/ai-daily
+          mkdir -p _site/x.xpeng.com _site/x.xiaopeng.com _site/.dxy.com _site/.dxy.com/ai-daily
           cp launch.html _site/launch.html
+          cp launch-cn.html _site/launch-cn.html
           cp x.xpeng.com/index.html _site/x.xpeng.com/index.html
+          cp x.xiaopeng.com/index.html _site/x.xiaopeng.com/index.html
           cp .dxy.com/poc.html _site/.dxy.com/poc.html
           cp .dxy.com/poc.html _site/.dxy.com/ai-daily/poc.html
           cp welfare-entry.html _site/welfare-entry.html
