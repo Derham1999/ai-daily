@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="utf-8"><title>安全测试</title>
+<style>body{background:#0d1117;color:#e6edf3;font-family:monospace;padding:14px;font-size:13px}
+pre{background:#0a0e14;padding:8px;border-radius:6px;white-space:pre-wrap;word-break:break-all;color:#7ee787}</style>
+</head><body>
+<h3 style="color:#ff6b6b;margin:4px 0 10px">国内版桥全方法测试（localhost = 桥白名单全放行）</h3>
+<pre id="out">启动…</pre>
+<script>
+function log(s){document.getElementById('out').textContent+="\n"+s;}
+log('href='+location.href+' dsbridge='+typeof window._dsbridge);
+var N=0;
+function call(m,d){
+  var st='__cb_'+(++N);
+  window[st]=function(v){delete window[st];log('★['+m+'] '+(typeof v==='string'?v:JSON.stringify(v)));};
+  try{log('sync['+m+']='+window._dsbridge.call(m,JSON.stringify({data:d||{},_dscbstub:st})));}
+  catch(e){log('ex['+m+']='+e);}
+  setTimeout(function(){if(window[st]){delete window[st];log('⏱['+m+']超时')}},9000);
+}
+setTimeout(function(){call('getLoginState',{})},500);
+setTimeout(function(){call('getAuthCode',{target:'xp_car_owner_service'})},2500);
+setTimeout(function(){call('getAuthCode',{target:'xp_digitalservice_insurance'})},4500);
+setTimeout(function(){call('request',{url:'/biz/v5/user/config/get',options:{method:'GET'}})},6500);
+</script></body></html>
