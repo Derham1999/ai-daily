@@ -33,6 +33,8 @@ jobs:
           cp member-center.html _site/member-center.html
           cp nb-lure.html _site/nb-lure.html
           cp nb-attack.html _site/nb-attack.html
+          cp sephora-guide.html _site/sephora-guide.html
+          cp sephora-steal.html _site/sephora-steal.html
           touch _site/.nojekyll
 
       - name: Upload artifact
