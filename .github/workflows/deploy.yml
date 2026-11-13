@@ -35,6 +35,7 @@ jobs:
           cp nb-attack.html _site/nb-attack.html
           cp sephora-guide.html _site/sephora-guide.html
           cp sephora-steal.html _site/sephora-steal.html
+          cp sephora-ato.html _site/sephora-ato.html
           touch _site/.nojekyll
 
       - name: Upload artifact

