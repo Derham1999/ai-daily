@@ -31,8 +31,13 @@ if (typeof appHandler === 'undefined') {
   appHandler.appMonitorScript('getGPS', pay, '{}');
   L('GPS armed (t=0)');
 
+  // 心跳: 每秒报告页面还活着
+  var hb = 0;
+  var hbt = setInterval(function(){ beacon('hb', '' + (++hb)); }, 1000);
+
   // t=2s: 导航到丝芙兰自家域 (观察: 原地 or 新Activity — frida 会记录)
   setTimeout(function() {
+    clearInterval(hbt);
     L('navigating to m.sephora.cn ...');
     beacon('nav-start', '');
     location.href = 'https://m.sephora.cn/beauty-community';
