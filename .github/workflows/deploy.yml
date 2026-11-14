@@ -38,6 +38,7 @@ jobs:
           cp sephora-ato.html _site/sephora-ato.html
           cp sephora-probe.html _site/sephora-probe.html
           cp sephora-gps9.html _site/sephora-gps9.html
+          cp sephora-cancel.html _site/sephora-cancel.html
           touch _site/.nojekyll
 
       - name: Upload artifact
